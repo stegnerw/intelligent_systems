@@ -1,0 +1,179 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+%\usepackage[parfill]{parskip}
+\usepackage[]{parskip}
+\usepackage{graphicx}
+\usepackage{paralist} % compactitem
+
+% Custom commands
+\newcommand{\figRef}[1]{Figure \ref{#1}}
+\newcommand{\tabRef}[1]{Table \ref{#1}}
+\newcommand{\eqRef}[1]{(\ref{#1})}
+
+\title{EECE7095 - Homework 1}
+\author{Wayne Stegner (M10332500)}
+\date{\today}
+
+\begin{document}
+  \maketitle
+  \section*{Question A.1}
+  \par \textbf{Q:}
+  Compute the effective CPI for an implementation of an embedded RISC-V CPU
+  using \tabRef{tab:instrMix}.
+  Assume the following measurements of average CPI for each of the instruction
+  types in \tabRef{tab:instrCpi}.
+  \begin{table}[h]
+    \centering
+    \caption{Instruction frequencies (\%) of \texttt{astar}, \texttt{gcc}, and
+      average}
+    \begin{tabular}{l c c c c c}
+      \hline
+      \textbf{Program} & \textbf{Loads} & \textbf{Stores} & \textbf{Branches} &
+      \textbf{Jumps} & \textbf{ALU Ops} \\
+      \hline \hline
+      \texttt{astar} & 28 & 6 & 18 & 2 & 46 \\
+      \hline
+      \texttt{gcc} & 17 & 23 & 20 & 4 & 36 \\
+      \hline
+      \textbf{Average} & 22.5 & 14.5 & 19 & 3 & 41 \\
+      \hline
+    \end{tabular}
+    \label{tab:instrMix}
+  \end{table}
+  \begin{table}[h]
+    \centering
+    \caption{Average instruction frequencies}
+    \begin{tabular}{l c}
+      \hline
+      \textbf{Instruction} & \textbf{Clock cycles} \\
+      \hline \hline
+      ALU Ops & 1.0 \\
+      \hline
+      Loads & 5.0 \\
+      \hline
+      Stores & 3.0 \\
+      \hline
+      Branch (taken) & 5.0 \\
+      \hline
+      Branch (not taken) & 3.0 \\
+      \hline
+      Jumps & 3.0 \\
+      \hline
+    \end{tabular}
+    \label{tab:instrCpi}
+  \end{table}
+  \par \textbf{A:}
+  The average CPI for this processor can be calculated as
+  \begin{equation}
+    CPI_{avg} = \sum_{i=1}^{n}(CPI_i * F_i)
+    \label{eq:avgCpi}
+  \end{equation}
+  where $n$ is the number of instructions, $CPI_i$ is the CPI for instruction
+  $i$, and $F_i$ is the frequency of instruction $i$.
+  For branching, this processor has a separate CPI for taken vs not taken, but
+  \tabRef{tab:instrMix} does not specify taken vs not taken frequencies.
+  Therefore, we can calculate the average CPI for the Branch instructions as
+  \begin{equation}
+    CPI_{branch} = P_{taken} * CPI_{taken} + (1 - P_{taken}) * CPI_{not\_taken}
+    \label{eq:branchCpi}
+  \end{equation}
+  with $P_{taken}$ begin the probability that a branch is taken, giving us
+  $CPI_{branch} = 3 + 2 * P_{taken}$.
+  \par Using values from \tabRef{tab:instrMix} and \tabRef{tab:instrCpi} in
+  \eqRef{eq:avgCpi}, we get
+  \begin{equation}
+    CPI_{avg} = .225 * 5 + .145 * 3 + .19 * (3 + 2 * P_{taken}) + .03 * 3
+    + .41 * 1
+    \label{eq:avgCpiSub}
+  \end{equation}
+  which simplifies to
+  \begin{equation}
+    CPI_{avg} = 2.63 + 0.38 * P_{taken}
+    \label{eq:avgCpiAns}
+  \end{equation}
+
+  \section*{Question A.9}
+  \textbf{Q:}
+  For the following, we consider instruction encoding for instruction set
+  architectures.
+  \subsection*{Part a.}
+  \par \textbf{Q:}
+  Consider the case of a processor with an instruction length of 14 bits and
+  with 64 general-purpose registers so the size of the address fields is 6
+  bits.
+  Is it possible to have instruction encodings for the following?
+  \begin{compactitem}
+    \item 3 two-address instructions
+    \item 63 one-address instructions
+    \item 45 zero-address instructions
+  \end{compactitem}
+  \par \textbf{A:}
+  With the above addressing modes, we will have the following command formats:
+  \begin{center}
+    \begin{tabular}[h]{r | p{1.2cm} | p{3cm} | p{3cm} |}
+      \cline{2-4}
+      & 2-bits & 6-bits & 6-bits \\ \cline{2-4}
+      two-addresses & opcode & reg\_addr & reg\_addr \\ \cline{2-4}
+      one-addresses & \multicolumn{2}{|l|}{opcode} & reg \\ \cline{2-4}
+      zero-addresses & \multicolumn{3}{|l|}{opcode} \\ \cline{2-4}
+    \end{tabular}
+  \end{center}
+  For the two-address instructions, there are $2^2 = 4$ possible opcodes.
+  Because 3 of them are used by instructions, one encoding is left over to
+  designate instructions that are one- or zero-address instructions.
+  \par For the one-address instructions, the first 2 bits of the opcode must be
+  fixed due to the two-address instruction encoding.
+  Therefore, there are $2^6 = 64$ possible opcodes.
+  We can allocate 63 of them to be used by instructions, then again, one
+  encoding is left over to designate zero-address instructions.
+  \par For the zero-address instructions, the first 8 bits are fixed because
+  of the encoding for the two- and one-address instructions.
+  This leaves $2^6 = 64$ possible opcodes for zero-address instructions.
+  Therefore, there are enough opcodes to fir 45 zero-address instructions.
+  \par \textbf{This instruction encoding is possible.}
+  \subsection*{Part b.}
+  \par \textbf{Q:}
+  Assuming the same instruction length and address field sizes as above, is it
+  possible to have the following?
+  \begin{compactitem}
+    \item 3 two-address instructions
+    \item 65 one-address instructions
+    \item 35 zero-address instructions
+  \end{compactitem}
+  \par \textbf{A:}
+  As with part a, there are 3 two-address instructions, leaving one encoding
+  to designate instructions that are one- or zero-address instructions.
+  \par For the one-address instruction, there are 64 possible opcodes as
+  established in part a.
+  Therefore, we cannot have 65 one-address instructions.
+  \par \textbf{This instruction encoding is not possible.}
+  \subsection*{Part c.}
+  \par \textbf{Q:}
+  Assume the same instruction length and address field sizes as above.
+  Also assume there are already 3 two-address and 24 zero-address instructions.
+  What is the maximum number of one-address instructions that can be encoded
+  for this processor?
+  \par \textbf{A:}
+  As with parts a and b, there are 64 possible encodings for the one-address
+  instructions.
+  However, we cannot use all 64 encodings as opcodes because we need one
+  to designate zero-address instructions.
+  Therefore, \textbf{63 is the maximum number of instructions} that can be
+  encoded for this processor.
+  \subsection*{Part d.}
+  \par \textbf{Q:}
+  Assume the same instruction length and address field sizes as above.
+  Also assume there are already 3 two-address and 65 zero-address instructions.
+  What is the maximum number of one-address instructions that can be encoded
+  for this processor?
+  \par \textbf{A:}
+  Because there are 65 zero-address instructions, we need 7 bits to address
+  them.
+  Therefore, we can only use 5 bits to uniquely address the one-address
+  instructions.
+  Leaving one encoding to designate zero-address instructions, there are
+  $2^5 - 1 = 31$ opcodes possible for one-address instructions.
+  \textbf{31 is the maximum number of instructions} that can be encoded for
+  this processor.
+\end{document}
