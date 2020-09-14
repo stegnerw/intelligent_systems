@@ -50,7 +50,7 @@ if __name__ == '__main__':
     SIM_TIME = 1000 # Simulation time in milliseconds
     TAU = 0.25 # Simulation time step in milliseconds
     SIM_STEPS = int(SIM_TIME / TAU) + 1 # simulation steps
-    INPUT_START_TIME = 0 # Time to start input signal
+    INPUT_START_TIME = -1 # Time to start input signal
     SPIKE_THRESH = 30.0 # Threshold to determine spikes
 
     # Simulation
