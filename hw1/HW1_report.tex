@@ -1,179 +1,181 @@
-\documentclass[a4paper]{article}
+\documentclass[a4paper, 11pt, titlepage]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-%\usepackage[parfill]{parskip}
 \usepackage[]{parskip}
 \usepackage{graphicx}
 \usepackage{paralist} % compactitem
-
+\usepackage{csquotes}
+\usepackage[
+  style=ieee,
+  citecounter,
+  labelnumber,
+  backend=biber,
+  bibencoding=utf8,
+  sorting=none
+]{biblatex}
+\addbibresource{references.bib}
+\usepackage{wrapfig}
 % Custom commands
 \newcommand{\figRef}[1]{Figure \ref{#1}}
 \newcommand{\tabRef}[1]{Table \ref{#1}}
 \newcommand{\eqRef}[1]{(\ref{#1})}
 
-\title{EECE7095 - Homework 1}
-\author{Wayne Stegner (M10332500)}
+\title{EECE6036 - Homework 1}
+\author{Wayne Stegner}
 \date{\today}
 
 \begin{document}
   \maketitle
-  \section*{Question A.1}
-  \par \textbf{Q:}
-  Compute the effective CPI for an implementation of an embedded RISC-V CPU
-  using \tabRef{tab:instrMix}.
-  Assume the following measurements of average CPI for each of the instruction
-  types in \tabRef{tab:instrCpi}.
-  \begin{table}[h]
+  \section{Problem 1}
+  \subsection{Problem Summary}
+  \par This problem involves simulating a single neuron as defined by the
+  Izhikevich model \cite{Izhikevich2003}.
+  This neuron is defined by the following differential equations:
+  \begin{equation}
+    \frac{\partial v}{\partial t} = 0.04v^{2} + 5v + 140 - u + I(t)
+    \label{eq:dv}
+  \end{equation}
+  \begin{equation}
+    \frac{\partial u}{\partial t} = a(bv - u)
+    \label{eq:du}
+  \end{equation}
+  \begin{equation}
+    if v \geq 30; v = c, u = u + d
+    \label{eq:cond}
+  \end{equation}
+  \par The neuron is simulated in the \textit{Regular Spiking} configuration
+  ($a=0.02$, $b=0.25$, $c=-65$, $d=6$), described in
+  \cite{Izhikevich2003,Izhikevich2004}, with a range of DC synaptic currents,
+  $I(t)$, over 1000 ms with a time step of 0.25 ms.
+  Each trial uses a static value of $I(t)$ ranging from $I(t)=0$ to $I(t)=20$
+  with a step of 0.5.
+  The purpose of this problem is to measure the membrane potential of the neuron, as well as
+  the mean spiking rate for each value of $I(t)$.
+  \subsection{Results}
+  \begin{wrapfigure}{r}{0.5\textwidth}
     \centering
-    \caption{Instruction frequencies (\%) of \texttt{astar}, \texttt{gcc}, and
-      average}
-    \begin{tabular}{l c c c c c}
-      \hline
-      \textbf{Program} & \textbf{Loads} & \textbf{Stores} & \textbf{Branches} &
-      \textbf{Jumps} & \textbf{ALU Ops} \\
-      \hline \hline
-      \texttt{astar} & 28 & 6 & 18 & 2 & 46 \\
-      \hline
-      \texttt{gcc} & 17 & 23 & 20 & 4 & 36 \\
-      \hline
-      \textbf{Average} & 22.5 & 14.5 & 19 & 3 & 41 \\
-      \hline
-    \end{tabular}
-    \label{tab:instrMix}
-  \end{table}
-  \begin{table}[h]
+    \vspace{-44pt}
+    \includegraphics[width=0.48\textwidth]{images/spike_rate_single.png}
+    \vspace{-10pt}
+    \caption{
+      Mean spiking rate as a function of synaptic current of a single neuron.
+    }
+    \vspace{-22pt}
+    \label{fig:rSingle}
+  \end{wrapfigure}
+  \figRef{fig:rSingle} shows the mean spiking rate plotted as a function of the
+  synaptic current.
+  Spiking rate is calculated by averaging the number of spikes per ms over the
+  last 800 ms of each simulation.
+  \figRef{fig:vSingle} shows the membrane potential plotted over 1000 ms for
+  various input currents.
+  \begin{figure}[ht]
     \centering
-    \caption{Average instruction frequencies}
-    \begin{tabular}{l c}
-      \hline
-      \textbf{Instruction} & \textbf{Clock cycles} \\
-      \hline \hline
-      ALU Ops & 1.0 \\
-      \hline
-      Loads & 5.0 \\
-      \hline
-      Stores & 3.0 \\
-      \hline
-      Branch (taken) & 5.0 \\
-      \hline
-      Branch (not taken) & 3.0 \\
-      \hline
-      Jumps & 3.0 \\
-      \hline
-    \end{tabular}
-    \label{tab:instrCpi}
-  \end{table}
-  \par \textbf{A:}
-  The average CPI for this processor can be calculated as
+    \includegraphics[width=0.8\textwidth]{images/v_mem_plot_single.png}
+    \vspace{-20pt}
+    \caption{
+      Membrane potential as a function of time for various input currents for a
+      single neuron.
+    }
+    \label{fig:vSingle}
+  \end{figure}
+  \subsection{Discussion}
+  \par In \figRef{fig:rSingle}, the mean spiking rate is roughly a linear
+  function of the input current.
+  The spiking rate is more visually illustrated in \figRef{fig:vSingle}.
+  When the simulation starts, there is an initial short burst of spikes, which
+  then settles out into a steady sequence of spikes.
+  This initial burst is why the first 200 ms of simulation are discarded before
+  calculating the mean spiking rate.
+  Effectively, this simulation demonstrates the use of a \textit{Regular
+  Spiking} neuron to translate a DC input into a spike train, where the higher
+  DC level translates to a higher frequency spike train.
+  \subsection{Conclusion}
+  In this problem, a simulation of a single \textit{Regular Spiking} neuron
+  using the Izhikevich model \cite{Izhikevich2003} with various DC input levels
+  is presented.
+  The resultant membrane potential plots in \figRef{fig:vSingle} reflect the
+  intended behaviour described by Izhikevich \cite{Izhikevich2003,
+  Izhikevich2004}.
+  This work shows that a semi-realistic artificial neuron can be simulated
+  using little computational overhead.
+  \pagebreak
+  \section{Problem 2}
+  \subsection{Problem Summary}
+  This problem builds upon the first, involving the simulation of a simple
+  network of two neurons with parameters as described in Problem 1.
+  Neuron A gets the input $I_{A} = 5$ and outputs the spike train $y_{A}$,
+  while neuron B gets input $I_{B}(t)$ and outputs the spike train $y_{B}$.
+  The system can be defined as:
   \begin{equation}
-    CPI_{avg} = \sum_{i=1}^{n}(CPI_i * F_i)
-    \label{eq:avgCpi}
+    I_{B}(t) = I_{B} + w_{BA} * y_{A}(t)
+    \label{eq:IB}
   \end{equation}
-  where $n$ is the number of instructions, $CPI_i$ is the CPI for instruction
-  $i$, and $F_i$ is the frequency of instruction $i$.
-  For branching, this processor has a separate CPI for taken vs not taken, but
-  \tabRef{tab:instrMix} does not specify taken vs not taken frequencies.
-  Therefore, we can calculate the average CPI for the Branch instructions as
   \begin{equation}
-    CPI_{branch} = P_{taken} * CPI_{taken} + (1 - P_{taken}) * CPI_{not\_taken}
-    \label{eq:branchCpi}
+    y_{i}(t) = 1 \quad if \quad v_{i} > 30, \quad else \quad y_{i} = 0
+    \label{eq:spiketrain}
   \end{equation}
-  with $P_{taken}$ begin the probability that a branch is taken, giving us
-  $CPI_{branch} = 3 + 2 * P_{taken}$.
-  \par Using values from \tabRef{tab:instrMix} and \tabRef{tab:instrCpi} in
-  \eqRef{eq:avgCpi}, we get
-  \begin{equation}
-    CPI_{avg} = .225 * 5 + .145 * 3 + .19 * (3 + 2 * P_{taken}) + .03 * 3
-    + .41 * 1
-    \label{eq:avgCpiSub}
-  \end{equation}
-  which simplifies to
-  \begin{equation}
-    CPI_{avg} = 2.63 + 0.38 * P_{taken}
-    \label{eq:avgCpiAns}
-  \end{equation}
-
-  \section*{Question A.9}
-  \textbf{Q:}
-  For the following, we consider instruction encoding for instruction set
-  architectures.
-  \subsection*{Part a.}
-  \par \textbf{Q:}
-  Consider the case of a processor with an instruction length of 14 bits and
-  with 64 general-purpose registers so the size of the address fields is 6
-  bits.
-  Is it possible to have instruction encodings for the following?
-  \begin{compactitem}
-    \item 3 two-address instructions
-    \item 63 one-address instructions
-    \item 45 zero-address instructions
-  \end{compactitem}
-  \par \textbf{A:}
-  With the above addressing modes, we will have the following command formats:
-  \begin{center}
-    \begin{tabular}[h]{r | p{1.2cm} | p{3cm} | p{3cm} |}
-      \cline{2-4}
-      & 2-bits & 6-bits & 6-bits \\ \cline{2-4}
-      two-addresses & opcode & reg\_addr & reg\_addr \\ \cline{2-4}
-      one-addresses & \multicolumn{2}{|l|}{opcode} & reg \\ \cline{2-4}
-      zero-addresses & \multicolumn{3}{|l|}{opcode} \\ \cline{2-4}
-    \end{tabular}
-  \end{center}
-  For the two-address instructions, there are $2^2 = 4$ possible opcodes.
-  Because 3 of them are used by instructions, one encoding is left over to
-  designate instructions that are one- or zero-address instructions.
-  \par For the one-address instructions, the first 2 bits of the opcode must be
-  fixed due to the two-address instruction encoding.
-  Therefore, there are $2^6 = 64$ possible opcodes.
-  We can allocate 63 of them to be used by instructions, then again, one
-  encoding is left over to designate zero-address instructions.
-  \par For the zero-address instructions, the first 8 bits are fixed because
-  of the encoding for the two- and one-address instructions.
-  This leaves $2^6 = 64$ possible opcodes for zero-address instructions.
-  Therefore, there are enough opcodes to fir 45 zero-address instructions.
-  \par \textbf{This instruction encoding is possible.}
-  \subsection*{Part b.}
-  \par \textbf{Q:}
-  Assuming the same instruction length and address field sizes as above, is it
-  possible to have the following?
-  \begin{compactitem}
-    \item 3 two-address instructions
-    \item 65 one-address instructions
-    \item 35 zero-address instructions
-  \end{compactitem}
-  \par \textbf{A:}
-  As with part a, there are 3 two-address instructions, leaving one encoding
-  to designate instructions that are one- or zero-address instructions.
-  \par For the one-address instruction, there are 64 possible opcodes as
-  established in part a.
-  Therefore, we cannot have 65 one-address instructions.
-  \par \textbf{This instruction encoding is not possible.}
-  \subsection*{Part c.}
-  \par \textbf{Q:}
-  Assume the same instruction length and address field sizes as above.
-  Also assume there are already 3 two-address and 24 zero-address instructions.
-  What is the maximum number of one-address instructions that can be encoded
-  for this processor?
-  \par \textbf{A:}
-  As with parts a and b, there are 64 possible encodings for the one-address
-  instructions.
-  However, we cannot use all 64 encodings as opcodes because we need one
-  to designate zero-address instructions.
-  Therefore, \textbf{63 is the maximum number of instructions} that can be
-  encoded for this processor.
-  \subsection*{Part d.}
-  \par \textbf{Q:}
-  Assume the same instruction length and address field sizes as above.
-  Also assume there are already 3 two-address and 65 zero-address instructions.
-  What is the maximum number of one-address instructions that can be encoded
-  for this processor?
-  \par \textbf{A:}
-  Because there are 65 zero-address instructions, we need 7 bits to address
-  them.
-  Therefore, we can only use 5 bits to uniquely address the one-address
-  instructions.
-  Leaving one encoding to designate zero-address instructions, there are
-  $2^5 - 1 = 31$ opcodes possible for one-address instructions.
-  \textbf{31 is the maximum number of instructions} that can be encoded for
-  this processor.
+  where $w_{BA}$ is the weight between neurons A and B and is fixed at 10.
+  Similarly to Problem 1, each trial uses a static value of$I_{B}$ ranging
+  from 0 to 20 with a step of 5.
+  The purpose is to measure the membrane potential of the neuron, as well as
+  the mean spiking rate for each value of $I_{B}$.
+  \subsection{Results}
+  \begin{wrapfigure}{r}{0.5\textwidth}
+    \centering
+    \vspace{-40pt}
+    \includegraphics[width=0.48\textwidth]{images/spike_rate_network.png}
+    \vspace{-10pt}
+    \caption{
+      Mean spiking rate as a function of synaptic current of a single neuron
+      (blue) vs the simple network (orange).
+    }
+    \vspace{-10pt}
+    \label{fig:rNetwork}
+  \end{wrapfigure}
+  \figRef{fig:rNetwork} shows the mean spiking rate plotted as a function of
+  the synaptic current for both the single neuron in Problem 1 and the network
+  from this problem.
+  Spiking rate is calculated by averaging the number of spikes per ms over the
+  last 800 ms of each simulation.
+  \figRef{fig:vNetwork} shows the membrane potential is plotted over 1000 ms
+  for various values of $I_{B}$.
+  \begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/v_mem_plot_network.png}
+    \vspace{-20pt}
+    \caption{
+      Membrane potential as a function of time for various input currents for a
+      simple network.
+    }
+    \label{fig:vNetwork}
+  \end{figure}
+  \subsection{Discussion}
+  In \figRef{fig:rNetwork}, the mean spiking rate of the network exhibits
+  similar characteristics as the single neuron, with both of them roughly
+  a linear function of the input current.
+  While there are slight fluctuations between the two plots, the overall trend
+  is identical.
+  In \figRef{fig:vNetwork}, the spiking rate looks very similar to those shown
+  in the single neuron in \figRef{fig:vSingle}.
+  When $I_{B} = 1$, there are slight perturbations which can be observed as the
+  neuron gradually approaches its spike.
+  They can be seen in most of the values of $I_{B}$, but they are the most
+  evident when $I_{B} = 1.0$.
+  These perturbations are caused by the spike train generated by neuron A, but
+  they do not seem to have an impact on the overall behaviour of neuron B.
+  \subsection{Conclusion}
+  In this problem, a simulation of a network of two \textit{Regular Spiking}
+  neurons using the Izhikevich model \cite{Izhikevich2003} with various DC
+  input levels is presented.
+  The resultant membrane potential plots in \figRef{fig:vNetwork} do not
+  deviate much from the results of a single neuron in \figRef{fig:vSingle},
+  and the mean spiking rate in \figRef{fig:rNetwork} shows how similar the
+  behaviour of the network of neurons is to the single neuron.
+  The perturbations induced by neuron A were quickly dissipated in neuron B,
+  which suggests that in order for artificial spiking neurons to impact each
+  other, either a more dense spike train is needed as an input into neuron B,
+  or neuron B should be tuned to not dissipate incoming spikes as quickly.
+  \pagebreak
+  \printbibliography
 \end{document}
