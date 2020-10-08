@@ -1,0 +1,2 @@
+train_err = 0.108
+test_err = 0.070
