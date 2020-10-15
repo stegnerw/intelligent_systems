@@ -1,0 +1,53 @@
+EECE6036 Homework 2
+
+* * * * * * Directory Structure * * * * * *
+
+This project has the following directory structure:
+<base directory>/
+  code/
+    data.txt
+    <python source files>
+  data/
+    <generated data>
+  images/
+    <generated images>
+
+* * * * * * Running the Code * * * * * *
+
+It runs in Python 3, but I specifically tested it with Python 3.6.9.
+It will NOT run in Python 2.
+
+To run the each file, run the following command from the code/ directory:
+
+python3 <file_name>
+
+Note: Depending on how you installed Python, you might replace python3 with
+python
+
+To run the code for problem 1, run the files knn.py and neighborhood.py.
+To run the code for problem 2, run the file perceptron.py.
+To run the code for problem 3, run the file problem_3.py.
+
+The file dataset.py is used to manage the dataset, and will generate a plot
+of the dataset points if run. It is not necessary to run it.
+
+The file classifier.py is an abstract class for common functions of the
+algorithms. It will not produce anything if run.
+
+Running the code will create a new directory in the base directory of the
+project called images/ and populate it with the figures used in the report.
+It will also generate the data/ directory and populate it with misc. data
+files.
+
+* * * * * * Dependencies * * * * * *
+
+The following are the package dependencies.
+  - numpy (1.19.2)
+  - matplotlib (3.3.1)
+It is very likely that they are already installed, but if the file will not
+run, run the following command from the base directory of the project:
+
+pip3 install -r requirements.txt
+
+Note: Depending on how you installed Python, you might replace pip3 with pip.
+
