@@ -7,18 +7,20 @@ import numpy as np
 
 
 class HiddenLayer(Layer):
-    def setDownstreamDelta(self, delta):
-        '''Set delta value for the next layer of the network
+    def setDownstreamSum(self, w, delta):
+        '''Sum the product of w and delta for the next layer
         Needed for calculating delta for this layer
         Parameters:
         -----------
+            w : np.ndarray
+                Matrix of weight values for the next layer
             delta : np.ndarray
                 Matrix of delta values for the next layer
         Returns:
         --------
             None
         '''
-        self.downstream_delta = delta
+        self.downstream_sum = np.matmul(w[:, :-1].transpose(), delta)
 
     def setDelta(self):
         '''Calculate delta for the hidden layer
@@ -29,8 +31,8 @@ class HiddenLayer(Layer):
         --------
             None
         '''
-        output_der = sigmoid_der(self.net_inputs)
-        pass
+        output_der = sigmoid_der(self.s)
+        self.delta = output_der * self.downstream_sum
 
 
 if __name__ == '__main__':

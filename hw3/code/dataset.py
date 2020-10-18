@@ -127,31 +127,6 @@ class Dataset:
             self.test_data = self.test_data[indeces]
             self.test_labels = self.test_labels[indeces]
 
-    def getTrainBatch(self, batch_size=1):
-        '''
-        Parameters:
-        -----------
-            batch_size : int, optional
-                Size of training batch
-                Must divide evenly to the number of data points
-        Returns:
-        --------
-            tuple of np.ndarray
-                Batched training data of shape
-                (data_points/batch_size, batch_size, 784)
-                Batched training labels of shape
-                (data_points/batch_size, batch_size, num_classes)
-        '''
-        # Check batch size compatability
-        assert (len(self.train_data) % batch_size) == 0, \
-                'Mismatch between batch size and number of data points'
-        num_batches = len(self.train_data) // batch_size
-        d_shape = (num_batches, batch_size, 784)
-        batched_data = self.train_data.reshape(d_shape)
-        l_shape = (num_batches, batch_size, len(self.classes))
-        batched_labels = self.train_labels.reshape(l_shape)
-        return (batched_data, batched_labels)
-
 
 if __name__ == '__main__':
     np.random.seed(69420)
@@ -168,10 +143,9 @@ if __name__ == '__main__':
     dataset = Dataset(DATA_FILE, LABEL_FILE)
     dataset.shuffleData(train=True, test=True)
     # Plot a sample of digits
-    data, labels = dataset.getTrainBatch(100)
     fig, a = plt.subplots(10, 10)
     for i in range(100):
-        img = data[1][i]
+        img = dataset.train_data[i]
         a[i//10][i%10].imshow(img.reshape(28, 28, order='F'),
                 cmap='Greys_r')
         a[i//10][i%10].axis('off')

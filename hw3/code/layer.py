@@ -8,8 +8,8 @@ import numpy as np
 class Layer:
     def __init__(
             self,
-            num_inputs = 5,
-            num_neurons = 3,
+            num_neurons,
+            num_inputs,
         ):
         '''Initialize Layer object
         Parameters:
@@ -25,15 +25,15 @@ class Layer:
         '''
         self.num_inputs = num_inputs
         self.num_neurons = num_neurons
-        self.initWeights()
-        # Batch states to save for back-prop
-        self.inputs = None # Inputs for the current batch
-        self.net_inputs = None # Net inputs pre-activation function
-        self.output = None # Final output of the layer
+        self.initW()
+        # Pass states to save for back-prop
+        self.x = None # Input for current pass
+        self.s = None # Net inputs pre-activation function
+        self.y = None # Final output of the layer
         self.delta = None # Delta of this layer
-        self.weight_change = np.zeros(self.weights.shape) # Weight changes for the batch
+        self.w_change = np.zeros(self.w.shape) # Weight changes
 
-    def initWeights(self):
+    def initW(self):
         '''Initialize weights for the perceptron
         Parameters:
         -----------
@@ -43,33 +43,30 @@ class Layer:
             None
         '''
         # Uniform initialization from -1 to 1
-        weights_shape = (self.num_neurons, self.num_inputs + 1)
-        self.weights = np.random.uniform(-1, 1, weights_shape)
-        self.weight_change = np.zeros(self.weights.shape)
+        w_shape = (self.num_neurons, self.num_inputs + 1)
+        self.w = np.random.uniform(-1, 1, w_shape)
+        self.w_change = np.zeros(self.w.shape)
 
-    def forwardPass(self, inputs):
+    def forwardPass(self, x):
         '''Pass the input forward through the layer
         Parameters:
         -----------
-            inputs : np.ndarray of np.float64
-                Inputs to the layer with shape (e, i) where e is number of
-                elements in the input and i is the number of inputs
+            x : np.ndarray of np.float64
+                Input to the layer
         Returns:
         --------
             np.array of np.float64
-                Output of the layer with shape (n, i) where n is the number of
-                neurons in this layer and i is the number of inputs
+                Output of the layer
         '''
         # Add bias input
-        bias = np.ones(inputs.shape[1])
-        inputs = np.vstack((bias, inputs))
+        x = np.concatenate(([1], x))
         # Save inputs for back-prop
-        self.inputs = inputs
+        self.x = x
         # Dot product weights * inputs
-        self.net_inputs = np.matmul(self.weights, inputs)
+        self.s = np.matmul(self.w, x)
         # Pass through sigmoid activation
-        self.output = sigmoid(self.net_inputs)
-        return self.output
+        self.y = sigmoid(self.s)
+        return self.y
 
     def setDelta(self):
         '''Calculate delta value, different for Output and Hidden layer
@@ -77,12 +74,12 @@ class Layer:
         '''
         raise NotImplementedError('Cannot call from Layer class')
 
-    def updateWeights(self, learning_rate=1.0, alpha=0.1):
-        '''Calculate and apply weight updates for the most recent forward pass
+    def getWChange(self, eta=1.0, alpha=0.1):
+        '''Calculate weight updates for the most recent forward pass
         Requires delta to be calculated (varies between hidden/output layers)
         Parameters:
         -----------
-            learning_rate : float
+            eta : float
                 Learning rate for weight adjustments
             alpha : float
                 Momentum scalar
@@ -93,12 +90,17 @@ class Layer:
         # Set delta value
         self.setDelta()
         # Pre-scale weight change for momentum
-        self.weight_change *= alpha
+        self.w_change *= alpha
         # Calculate new weight change
-        new_change = learning_rate * np.matmul(self.delta * self.inputs)
-        self.weight_change += new_change
-        # Update weights
-        self.weights += self.weight_change
+        d = self.delta.reshape(len(self.delta), 1)
+        x = self.x.reshape(1, len(self.x))
+        new_change = eta * np.matmul(d, x)
+        self.w_change += new_change
+
+    def changeW(self):
+        '''
+        '''
+        self.w += self.w_change
 
 
 if __name__ == '__main__':
@@ -115,12 +117,11 @@ if __name__ == '__main__':
     IMG_DIR = ROOT_DIR.joinpath('images')
     IMG_DIR.mkdir(mode=0o775, exist_ok=True)
     # Test layer
-    layer = Layer(num_inputs=784, num_neurons=10)
+    layer = Layer(10, 784)
     # Create dataset
     dataset = Dataset(DATA_FILE, LABEL_FILE)
     dataset.shuffleData(train=True, test=True)
-    # Test batched processing a forward pass
-    data, labels = dataset.getTrainBatch(batch_size=5)
-    for d, l in zip(data, labels):
-        print(layer.forwardPass(d.transpose()).shape)
+    # Test forward pass
+    for d, l in zip(dataset.test_data, dataset.test_labels):
+        print(layer.forwardPass(d))
 

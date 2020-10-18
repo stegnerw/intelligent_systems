@@ -7,18 +7,18 @@ import numpy as np
 
 
 class OutputLayer(Layer):
-    def setLabels(self, labels):
+    def setLabel(self, label):
         '''Set the labels for this batch
         Needed for calculating delta for this layer
         Parameters:
         -----------
-            labels : np.ndarray
-                Matrix of labels for the current batch
+            label : np.ndarray
+                One-hot encoded label
         Returns:
         --------
             None
         '''
-        self.labels = labels
+        self.label = label
 
     def setDelta(self):
         '''Calculate delta for the output layer
@@ -29,10 +29,22 @@ class OutputLayer(Layer):
         --------
             None
         '''
-        error = self.labels - self.output
-        output_der = sigmoid_der(self.net_inputs)
-        print(f'error: {error.shape}\noutput_der: {output_der.shape}')
-        self.delta = error * output_der
+        e = self.label - self.y
+        y_der = sigmoid_der(self.s)
+        self.delta = e * y_der
+
+    def thresholdOutputs(self, L, H):
+        '''Threshold outputs
+        Parameters:
+        -----------
+            L, H: float
+                Low and high thresholds for outputs
+        Returns:
+        --------
+            None
+        '''
+        self.y[self.y >= H] = 1.0
+        self.y[self.y <= L] = 0.0
 
 
 if __name__ == '__main__':
