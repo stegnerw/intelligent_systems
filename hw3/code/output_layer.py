@@ -7,7 +7,32 @@ import numpy as np
 
 
 class OutputLayer(Layer):
-    pass
+    def setLabels(self, labels):
+        '''Set the labels for this batch
+        Needed for calculating delta for this layer
+        Parameters:
+        -----------
+            labels : np.ndarray
+                Matrix of labels for the current batch
+        Returns:
+        --------
+            None
+        '''
+        self.labels = labels
+
+    def setDelta(self):
+        '''Calculate delta for the output layer
+        Parameters:
+        -----------
+            None
+        Returns:
+        --------
+            None
+        '''
+        error = self.labels - self.output
+        output_der = sigmoid_der(self.net_inputs)
+        print(f'error: {error.shape}\noutput_der: {output_der.shape}')
+        self.delta = error * output_der
 
 
 if __name__ == '__main__':

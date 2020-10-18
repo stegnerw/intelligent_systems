@@ -31,7 +31,7 @@ class Layer:
         self.net_inputs = None # Net inputs pre-activation function
         self.output = None # Final output of the layer
         self.delta = None # Delta of this layer
-        self.weight_change = None # Weight changes for the batch
+        self.weight_change = np.zeros(self.weights.shape) # Weight changes for the batch
 
     def initWeights(self):
         '''Initialize weights for the perceptron
@@ -60,15 +60,16 @@ class Layer:
                 Output of the layer with shape (n, i) where n is the number of
                 neurons in this layer and i is the number of inputs
         '''
-        # Save inputs for back-prop
-        self.inputs = inputs
         # Add bias input
         bias = np.ones(inputs.shape[1])
         inputs = np.vstack((bias, inputs))
+        # Save inputs for back-prop
+        self.inputs = inputs
         # Dot product weights * inputs
         self.net_inputs = np.matmul(self.weights, inputs)
         # Pass through sigmoid activation
-        self.output = sigmoid(net_inputs)
+        self.output = sigmoid(self.net_inputs)
+        return self.output
 
     def setDelta(self):
         '''Calculate delta value, different for Output and Hidden layer
@@ -77,7 +78,7 @@ class Layer:
         raise NotImplementedError('Cannot call from Layer class')
 
     def updateWeights(self, learning_rate=1.0, alpha=0.1):
-        '''Calculate the weight updates for the most recent forward pass
+        '''Calculate and apply weight updates for the most recent forward pass
         Requires delta to be calculated (varies between hidden/output layers)
         Parameters:
         -----------
@@ -89,10 +90,12 @@ class Layer:
         --------
             None
         '''
+        # Set delta value
+        self.setDelta()
         # Pre-scale weight change for momentum
         self.weight_change *= alpha
         # Calculate new weight change
-        new_change = learning_rate * self.delta * self.inputs
+        new_change = learning_rate * np.matmul(self.delta * self.inputs)
         self.weight_change += new_change
         # Update weights
         self.weights += self.weight_change

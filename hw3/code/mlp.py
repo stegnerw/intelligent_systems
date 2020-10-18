@@ -49,7 +49,12 @@ if __name__ == '__main__':
     IMG_DIR.mkdir(mode=0o775, exist_ok=True)
     # Test layer
     mlp = MLP()
-    # # Create dataset
-    # dataset = Dataset(DATA_FILE, LABEL_FILE)
-    # dataset.shuffleData(train=True, test=True)
-
+    # Create dataset
+    dataset = Dataset(DATA_FILE, LABEL_FILE)
+    dataset.shuffleData(train=True, test=True)
+    data, labels = dataset.getTrainBatch(5)
+    # Simulate testing back-prop
+    o = mlp.layers[0].forwardPass(data[0].transpose())
+    o = mlp.layers[1].forwardPass(o)
+    mlp.layers[1].setLabels(labels[0].transpose())
+    mlp.layers[1].updateWeights()

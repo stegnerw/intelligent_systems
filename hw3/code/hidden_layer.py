@@ -7,7 +7,30 @@ import numpy as np
 
 
 class HiddenLayer(Layer):
-    pass
+    def setDownstreamDelta(self, delta):
+        '''Set delta value for the next layer of the network
+        Needed for calculating delta for this layer
+        Parameters:
+        -----------
+            delta : np.ndarray
+                Matrix of delta values for the next layer
+        Returns:
+        --------
+            None
+        '''
+        self.downstream_delta = delta
+
+    def setDelta(self):
+        '''Calculate delta for the hidden layer
+        Parameters:
+        -----------
+            None
+        Returns:
+        --------
+            None
+        '''
+        output_der = sigmoid_der(self.net_inputs)
+        pass
 
 
 if __name__ == '__main__':

@@ -58,15 +58,15 @@ class Dataset:
         labels = [int(l) for l in labels]
         # Make images and sort into bins
         self.data_points = dict()
-        self.labels = list()
+        self.classes = list()
         for d, l in zip(data, labels):
-            if l not in self.labels:
-                self.labels.append(l)
+            if l not in self.classes:
+                self.classes.append(l)
                 self.data_points[l] = list()
             self.data_points[l].append(d)
-        self.labels.sort()
+        self.classes.sort()
         # Turn data lists into numpy arrays
-        for l in self.labels:
+        for l in self.classes:
             self.data_points[l] = np.array(self.data_points[l],
                     dtype=np.float64)
 
@@ -86,12 +86,12 @@ class Dataset:
         self.test_data = list()
         self.test_labels = list()
         # Shuffle the data points first
-        for l in self.labels:
+        for l in self.classes:
             np.random.shuffle(self.data_points[l])
         # Iterate through the data and partition
-        points_per_class = len(self.data_points[self.labels[0]])
+        points_per_class = len(self.data_points[self.classes[0]])
         train_per_class = int(train_portion * points_per_class)
-        for l in self.labels:
+        for l in self.classes:
             for i, d in enumerate(self.data_points[l]):
                 if i < train_per_class:
                     self.train_data.append(d)
@@ -104,6 +104,9 @@ class Dataset:
         self.train_labels = np.array(self.train_labels)
         self.test_data = np.array(self.test_data)
         self.test_labels = np.array(self.test_labels)
+        # Turn labels into one-hot arrays
+        self.train_labels = np.eye(len(self.classes))[self.train_labels]
+        self.test_labels = np.eye(len(self.classes))[self.test_labels]
 
     def shuffleData(self, train=True, test=False):
         '''Shuffle a pair of data and labels
@@ -137,14 +140,16 @@ class Dataset:
                 Batched training data of shape
                 (data_points/batch_size, batch_size, 784)
                 Batched training labels of shape
-                (data_points/batch_size, batch_size)
+                (data_points/batch_size, batch_size, num_classes)
         '''
         # Check batch size compatability
         assert (len(self.train_data) % batch_size) == 0, \
                 'Mismatch between batch size and number of data points'
         num_batches = len(self.train_data) // batch_size
-        batched_data = self.train_data.reshape(num_batches, batch_size, 784)
-        batched_labels = self.train_labels.reshape(num_batches, batch_size)
+        d_shape = (num_batches, batch_size, 784)
+        batched_data = self.train_data.reshape(d_shape)
+        l_shape = (num_batches, batch_size, len(self.classes))
+        batched_labels = self.train_labels.reshape(l_shape)
         return (batched_data, batched_labels)
 
 
@@ -158,6 +163,7 @@ if __name__ == '__main__':
     LABEL_FILE = CODE_DIR.joinpath('labels.txt')
     IMG_DIR = ROOT_DIR.joinpath('images')
     IMG_DIR.mkdir(mode=0o775, exist_ok=True)
+    IMG_SAMPLE_FILE = IMG_DIR.joinpath('digit_samples.png')
     # Create dataset
     dataset = Dataset(DATA_FILE, LABEL_FILE)
     dataset.shuffleData(train=True, test=True)
@@ -170,6 +176,6 @@ if __name__ == '__main__':
                 cmap='Greys_r')
         a[i//10][i%10].axis('off')
     plt.tight_layout()
-    plt.savefig('digit_samples.png')
+    plt.savefig(str(IMG_SAMPLE_FILE))
     plt.close()
 
