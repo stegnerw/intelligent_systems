@@ -6,150 +6,119 @@ import pathlib
 import matplotlib.pyplot as plt
 
 
-class Dataset:
-    def __init__(
-            self,
-            data_file = 'data.txt',
-            label_file = 'labels.txt',
-            train_portion = 0.8,
-        ):
-        '''Initialize Dataset object
-        Parameters:
-        -----------
-            data_file : str
-                Name of the file to read data from
-            label_file : str
-                Name of the file to read labels from
-            train_portion : float
-                Portion of the dataset for the train set
-        Returns:
-        --------
-            Dataset
-                The Dataset object which was constructed
-        '''
-        data_file = pathlib.Path(data_file).resolve()
-        label_file = pathlib.Path(label_file).resolve()
-        # Check that the files exist
-        assert data_file.exists(), f'File not found: {str(data_file)}'
-        assert label_file.exists(), f'File not found: {str(label_file)}'
-        self.data_file = str(data_file)
-        self.label_file = str(label_file)
-        self.importDataFile()
-        self.partitionData(train_portion = 0.8)
+def partitionData(data_points, classes, train_portion):
+    '''Partition the data based on train_portion and save arrays
+    Parameters:
+    -----------
+        data_points : dict
+            Dictionary of data points where the key is the class
+        classes : list
+            List of classes (keys to the dictionary)
+        train_portion : float
+            Portion of the dataset to partition to train
+    Returns:
+    --------
+        None
+    '''
 
-    def importDataFile(self):
-        '''Imports data from the txt format Dr. Minai presented
-        Parameters:
-        -----------
-            None
-        Returns:
-        --------
-            None
-        '''
-        # Read data from txt file
-        data = list()
-        with open(self.data_file) as data_f:
-            data = data_f.readlines()
-        data = [d.split() for d in data]
-        # Read labels from txt file
-        labels = list()
-        with open(self.label_file) as label_f:
-            labels = label_f.readlines()
-        labels = [int(l) for l in labels]
-        # Make images and sort into bins
-        self.data_points = dict()
-        self.classes = list()
-        for d, l in zip(data, labels):
-            if l not in self.classes:
-                self.classes.append(l)
-                self.data_points[l] = list()
-            self.data_points[l].append(d)
-        self.classes.sort()
-        # Turn data lists into numpy arrays
-        for l in self.classes:
-            self.data_points[l] = np.array(self.data_points[l],
-                    dtype=np.float64)
 
-    def partitionData(self, train_portion=0.8):
-        '''Partition the data based on train_portion
-        Parameters:
-        -----------
-            train_portion : float, optional
-                Portion of the dataset to partition to train
-        Returns:
-        --------
-            None
-        '''
-        # Reset train and test partitions
-        self.train_data = list()
-        self.train_labels = list()
-        self.test_data = list()
-        self.test_labels = list()
-        # Shuffle the data points first
-        for l in self.classes:
-            np.random.shuffle(self.data_points[l])
-        # Iterate through the data and partition
-        points_per_class = len(self.data_points[self.classes[0]])
-        train_per_class = int(train_portion * points_per_class)
-        for l in self.classes:
-            for i, d in enumerate(self.data_points[l]):
-                if i < train_per_class:
-                    self.train_data.append(d)
-                    self.train_labels.append(l)
-                else:
-                    self.test_data.append(d)
-                    self.test_labels.append(l)
-        # Turn lists into numpy arrays
-        self.train_data = np.array(self.train_data)
-        self.train_labels = np.array(self.train_labels)
-        self.test_data = np.array(self.test_data)
-        self.test_labels = np.array(self.test_labels)
-        # Turn labels into one-hot arrays
-        self.train_labels = np.eye(len(self.classes))[self.train_labels]
-        self.test_labels = np.eye(len(self.classes))[self.test_labels]
-
-    def shuffleData(self, train=True, test=False):
-        '''Shuffle a pair of data and labels
-        Parameters:
-        -----------
-            train, test : bool
-                Indicate which arrays should be shuffled
-        Returns:
-        --------
-            None
-        '''
-        if train:
-            indeces = np.random.permutation(len(self.train_data))
-            self.train_data = self.train_data[indeces]
-            self.train_labels = self.train_labels[indeces]
-        if test:
-            indeces = np.random.permutation(len(self.test_data))
-            self.test_data = self.test_data[indeces]
-            self.test_labels = self.test_labels[indeces]
+def shufflePair(data, labels):
+    '''Shuffle a pair of data and labels in place
+    Parameters:
+    -----------
+        data, labels : np.ndarray
+            Data and labels to be shuffled
+    Returns:
+    --------
+        None
+    '''
+    assert len(data) == len(labels), \
+            'Size mismatch between data and labels'
+    indeces = np.random.permutation(len(data))
+    data[...] = data[indeces]
+    labels[...] = labels[indeces]
 
 
 if __name__ == '__main__':
+    # Seed for consistency
     np.random.seed(69420)
-    from matplotlib import pyplot as plt
-    import pathlib
+    # File location definitions
     CODE_DIR = pathlib.Path(__file__).parent.absolute()
-    ROOT_DIR = CODE_DIR.parent
     DATA_FILE = CODE_DIR.joinpath('data.txt')
     LABEL_FILE = CODE_DIR.joinpath('labels.txt')
-    IMG_DIR = ROOT_DIR.joinpath('images')
-    IMG_DIR.mkdir(mode=0o775, exist_ok=True)
-    IMG_SAMPLE_FILE = IMG_DIR.joinpath('digit_samples.png')
-    # Create dataset
-    dataset = Dataset(DATA_FILE, LABEL_FILE)
-    dataset.shuffleData(train=True, test=True)
-    # Plot a sample of digits
-    fig, a = plt.subplots(10, 10)
-    for i in range(100):
-        img = dataset.train_data[i]
-        a[i//10][i%10].imshow(img.reshape(28, 28, order='F'),
-                cmap='Greys_r')
-        a[i//10][i%10].axis('off')
-    plt.tight_layout()
-    plt.savefig(str(IMG_SAMPLE_FILE))
-    plt.close()
+    # Processed dataset storage
+    DATASET_DIR = CODE_DIR.joinpath('dataset')
+    DATASET_DIR.mkdir(mode=0o775, exist_ok=True)
+    TRAIN_DATA_FILE = DATASET_DIR.joinpath('train_data')
+    TRAIN_LABEL_FILE = DATASET_DIR.joinpath('train_labels')
+    TEST_DATA_FILE = DATASET_DIR.joinpath('test_data')
+    TEST_LABEL_FILE = DATASET_DIR.joinpath('test_labels')
+    # Constant definitions
+    TRAIN_PORTION = 0.8
+    ###########################################################################
+    # Import dataset
+    ###########################################################################
+    # Check that the files exist
+    assert DATA_FILE.exists(), f'File not found: {str(data_file)}'
+    assert LABEL_FILE.exists(), f'File not found: {str(label_file)}'
+    # Read data and labels from txt file
+    data = list()
+    with open(DATA_FILE) as data_f:
+        data = data_f.readlines()
+    data = [d.split() for d in data]
+    labels = list()
+    with open(LABEL_FILE) as label_f:
+        labels = label_f.readlines()
+    labels = [int(l) for l in labels]
+    # Make images and sort into bins based on class
+    data_points = dict()
+    classes = list()
+    for d, l in zip(data, labels):
+        if l not in classes:
+            classes.append(l)
+            data_points[l] = list()
+        data_points[l].append(d)
+    classes.sort()
+    # Turn data lists into numpy arrays
+    for l in classes:
+        data_points[l] = np.array(data_points[l], dtype=np.float64)
+    ###########################################################################
+    # Partition dataset
+    ###########################################################################
+    train_data = list()
+    train_labels = list()
+    test_data = list()
+    test_labels = list()
+    # Shuffle the data points first
+    for l in classes:
+        np.random.shuffle(data_points[l])
+    # Iterate through the data by class and partition
+    points_per_class = len(data_points[classes[0]])
+    train_per_class = int(TRAIN_PORTION * points_per_class)
+    for l in classes:
+        for i, d in enumerate(data_points[l]):
+            if i < train_per_class:
+                train_data.append(d)
+                train_labels.append(l)
+            else:
+                test_data.append(d)
+                test_labels.append(l)
+    # Turn lists into numpy arrays
+    train_data = np.array(train_data)
+    train_labels = np.array(train_labels)
+    test_data = np.array(test_data)
+    test_labels = np.array(test_labels)
+    # Turn labels into one-hot arrays
+    train_labels = np.eye(len(classes))[train_labels]
+    test_labels = np.eye(len(classes))[test_labels]
+    # Shuffle arrays
+    shufflePair(train_data, train_labels)
+    shufflePair(test_data, test_labels)
+    ###########################################################################
+    # Save arrays
+    ###########################################################################
+    np.save(str(TRAIN_DATA_FILE), train_data)
+    np.save(str(TRAIN_LABEL_FILE), train_labels)
+    np.save(str(TEST_DATA_FILE), test_data)
+    np.save(str(TEST_LABEL_FILE), test_labels)
 

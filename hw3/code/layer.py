@@ -8,25 +8,27 @@ import numpy as np
 class Layer:
     def __init__(
             self,
-            num_neurons,
-            num_inputs,
+            weight_file = None,
+            shape = None,
         ):
-        '''Initialize Layer object
+        '''Initialize Layer object either randomly or by a weight file
         Parameters:
         -----------
-            num_inputs : int
-                Number of input elements (not including bias)
-            num_neurons : int
-                Number of neurons in the layer
+            weight_file : str, optional
+                File to load pre-existing weights from
+            shape : tuple of int, optional
+                Dimensions of the layer in the form (num_neurons, num_inputs)
         Returns:
         --------
             Layer
                 The Layer object which was constructed
         '''
-        self.num_inputs = num_inputs
-        self.num_neurons = num_neurons
-        self.initW()
-        # Pass states to save for back-prop
+        if weight_file:
+            self.loadWeights(weight_file)
+        else:
+            self.shape = shape
+            self.initW()
+        # States to save for back-prop
         self.x = None # Input for current pass
         self.s = None # Net inputs pre-activation function
         self.y = None # Final output of the layer
@@ -43,8 +45,8 @@ class Layer:
             None
         '''
         # Uniform initialization from -1 to 1
-        w_shape = (self.num_neurons, self.num_inputs + 1)
-        self.w = np.random.uniform(-1, 1, w_shape)
+        w_shape = (self.shape[0], self.shape[1] + 1)
+        self.w = np.random.uniform(-1, 1, size=w_shape)
         self.w_change = np.zeros(self.w.shape)
 
     def forwardPass(self, x):
@@ -98,9 +100,39 @@ class Layer:
         self.w_change += new_change
 
     def changeW(self):
-        '''
+        '''Apply w_change to the weights
+        Parameters:
+        -----------
+            None
+        Returns:
+        --------
+            None
         '''
         self.w += self.w_change
+
+    def saveWeights(self, weight_file):
+        '''Save weights to a file
+        Parameters:
+        -----------
+            weight_file : str
+                File name to save weights in
+        Returns:
+        --------
+            None
+        '''
+        np.save(str(weight_file), self.w)
+
+    def loadWeights(self, weight_file):
+        '''Save weights to a file
+        Parameters:
+        -----------
+            weight_file : str
+                File name to save weights in
+        Returns:
+        --------
+            None
+        '''
+        self.w = np.load(str(weight_file))
 
 
 if __name__ == '__main__':
