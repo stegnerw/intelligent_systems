@@ -6,22 +6,6 @@ import pathlib
 import matplotlib.pyplot as plt
 
 
-def partitionData(data_points, classes, train_portion):
-    '''Partition the data based on train_portion and save arrays
-    Parameters:
-    -----------
-        data_points : dict
-            Dictionary of data points where the key is the class
-        classes : list
-            List of classes (keys to the dictionary)
-        train_portion : float
-            Portion of the dataset to partition to train
-    Returns:
-    --------
-        None
-    '''
-
-
 def shufflePair(data, labels):
     '''Shuffle a pair of data and labels in place
     Parameters:
