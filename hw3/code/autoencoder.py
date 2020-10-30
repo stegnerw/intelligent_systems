@@ -23,8 +23,6 @@ class Autoencoder(MLP):
             float
                 Error (1 - Hit Rate)
         '''
-        # Draw sample points
-        self.drawSamples()
         # Calculate loss
         total_loss = 0
         for d, l in zip(data, labels):
@@ -33,44 +31,6 @@ class Autoencoder(MLP):
             total_loss += loss / 2
         total_loss /= len(data)
         return total_loss
-
-    def addSamplePoints(self, data):
-        '''Adds sample points from the given data set
-        Parameters:
-        -----------
-            data : np.ndarray
-                Array of data points
-        '''
-        indeces = np.random.choice(np.arange(len(data)), 8, replace=False)
-        self.sample_points = data[indeces]
-
-    def drawSamples(
-            self,
-            file_name='sample_ae.png',
-            title='Autoencoder Sample Outputs'
-        ):
-        '''Draw the output predictions from self.sample_points
-        Parameters:
-        -----------
-            file_name : str, optional
-                Name of the file to save the plot
-            title : str, optional
-                Title of the plot
-        '''
-        num_samples = len(self.sample_points)
-        plt.figure(figsize=(6.4,2.4))
-        plt.suptitle(title)
-        for i, d in enumerate(self.sample_points):
-            plt.subplot(2, num_samples, i+1)
-            plt.imshow(d.reshape(28, 28, order='F'), cmap='Greys_r')
-            plt.axis('off')
-            pred = self.predict(d, one_hot=False)
-            plt.subplot(2, num_samples, i+num_samples+1)
-            plt.imshow(pred.reshape(28, 28, order='F'), cmap='Greys_r')
-            plt.axis('off')
-        plt.tight_layout()
-        plt.savefig(file_name)
-        plt.close()
 
 
 if __name__ == '__main__':
@@ -97,7 +57,6 @@ if __name__ == '__main__':
     autoencoder = Autoencoder(input_size=INPUTS)
     autoencoder.addLayer(neurons=HIDDEN_NEURONS, output=False)
     autoencoder.addLayer(neurons=INPUTS, output=True)
-    autoencoder.addSamplePoints(test_data)
     # Train the network
     autoencoder.train(
         train_data,

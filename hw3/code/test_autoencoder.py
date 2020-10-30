@@ -85,7 +85,6 @@ autoencoder = Autoencoder(input_size=INPUTS)
 for weight_file in sorted(MODEL_DIR.iterdir()):
     autoencoder.addLayer(file_name=weight_file)
 # Test on all data and draw samples
-autoencoder.addSamplePoints(test_data)
 test_err = autoencoder.eval(test_data, test_data)
 print(f'Test loss: {test_err:0.3f}')
 sample_title = 'Autoencoder Sample Outputs'
