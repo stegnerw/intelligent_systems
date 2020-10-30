@@ -82,6 +82,8 @@ if __name__ == '__main__':
     PLT_NAME = IMG_DIR.joinpath(f'autoencoder_loss.png')
     MODEL_DIR = CODE_DIR.joinpath('autoencoder')
     MODEL_DIR.mkdir(mode=0o775, exist_ok=True)
+    for f in MODEL_DIR.iterdir():
+        f.unlink()
     # Training constants
     POINTS_PER_EPOCH = 1000
     VALID_POINTS = 1000
@@ -91,10 +93,6 @@ if __name__ == '__main__':
     L = 0
     H = 1
     PATIENCE = 5
-    # Define model directory and clear existing weight files
-    MODEL_DIR.mkdir(mode=0o775, exist_ok=True)
-    for f in MODEL_DIR.iterdir():
-        f.unlink()
     # Test network
     autoencoder = Autoencoder(input_size=INPUTS)
     autoencoder.addLayer(neurons=HIDDEN_NEURONS, output=False)

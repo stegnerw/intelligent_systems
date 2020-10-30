@@ -44,6 +44,8 @@ if __name__ == '__main__':
     PLT_NAME = IMG_DIR.joinpath(f'classifier_loss.png')
     MODEL_DIR = CODE_DIR.joinpath('classifier')
     MODEL_DIR.mkdir(mode=0o775, exist_ok=True)
+    for f in MODEL_DIR.iterdir():
+        f.unlink()
     # Training constants
     POINTS_PER_EPOCH = 1000
     VALID_POINTS = 1000
@@ -52,11 +54,7 @@ if __name__ == '__main__':
     ALPHA = 0.8
     L = 0.25
     H = 0.75
-    PATIENCE = 8
-    # Define model directory and clear existing weight files
-    MODEL_DIR.mkdir(mode=0o775, exist_ok=True)
-    for f in MODEL_DIR.iterdir():
-        f.unlink()
+    PATIENCE = 5
     # Test network
     classifier = Classifier(input_size=INPUTS)
     classifier.addLayer(neurons=HIDDEN_NEURONS, output=False)
@@ -83,7 +81,6 @@ if __name__ == '__main__':
     plt.title(f'Classifier Loss vs Epoch Number')
     plt.xlabel('Epoch number')
     plt.xlim([0, classifier.epoch_num[-1]])
-    plt.xticks(classifier.epoch_num)
     plt.ylabel('Loss')
     plt.ylim([0, max(classifier.train_err[0], classifier.valid_err[0])])
     plt.savefig(str(PLT_NAME))
