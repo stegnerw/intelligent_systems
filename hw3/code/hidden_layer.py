@@ -19,7 +19,7 @@ class HiddenLayer(Layer):
         --------
             None
         '''
-        self.downstream_sum = np.dot(delta, w[:, :-1])
+        self.downstream_sum = np.matmul(w[:,:-1].transpose(), delta)
 
     def setDelta(self):
         '''Calculate delta for the hidden layer

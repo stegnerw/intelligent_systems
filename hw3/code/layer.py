@@ -48,8 +48,8 @@ class Layer:
             None
         '''
         w_shape = (self.hidden_neurons, self.inputs + 1)
-        a = np.sqrt(3 / (self.inputs + 1))
-        self.w = np.random.uniform(-a, a, size=w_shape)
+        a = np.sqrt(2 / (self.inputs))
+        self.w = np.random.normal(scale=a, size=w_shape)
         self.w_change = np.zeros(self.w.shape)
 
     def forwardPass(self, x):
@@ -68,9 +68,9 @@ class Layer:
         # Save inputs for back-prop
         self.x = x
         # Dot product weights * inputs
-        self.s = np.dot(self.w, x)
+        self.s = np.matmul(self.w, x)
         # Pass through sigmoid activation
-        self.y = 1.0 / (1 + np.exp(-self.s))
+        self.y = 1.0 / (1 + np.exp(-1 * self.s))
         return self.y
 
     def setDelta(self):
@@ -79,7 +79,7 @@ class Layer:
         '''
         raise NotImplementedError('Cannot call from Layer class')
 
-    def getWChange(self, eta=0.1, alpha=0.8):
+    def getWChange(self, eta=1, alpha=0.1):
         '''Calculate weight updates for the most recent forward pass
         Requires delta to be calculated (varies between hidden/output layers)
         Parameters:

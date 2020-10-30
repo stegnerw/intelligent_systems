@@ -33,7 +33,7 @@ class OutputLayer(Layer):
         self.delta = e * y_der
 
     def thresholdOutputs(self, L, H):
-        '''Threshold outputs
+        '''Threshold outputs based on the labels
         Parameters:
         -----------
             L, H: float
@@ -42,8 +42,8 @@ class OutputLayer(Layer):
         --------
             None
         '''
-        self.y[self.y >= H] = 1.0
-        self.y[self.y <= L] = 0.0
+        self.y[(self.y <= L) * (self.label == 0)] = 0
+        self.y[(self.y >= H) * (self.label == 1)] = 1
 
 
 if __name__ == '__main__':

@@ -65,11 +65,12 @@ class MLP:
             layer_output = l.forwardPass(layer_output)
         if one_hot:
             max_idx = np.argmax(layer_output)
-            return np.eye(10)[max_idx]
+            pred = np.eye(10)[max_idx]
         else:
-            return layer_output
+            pred = layer_output
+        return pred
 
-    def trainPoint(self, data, labels, eta, alpha, L, H):
+    def trainPoint(self, data, label, eta, alpha, L, H):
         '''Update the weights for a single point
         Parameters:
         -----------
@@ -84,11 +85,10 @@ class MLP:
             L, H : float, optional
                 Low and high thresholds for training
         '''
-        # Forward pass through all the layers
-        self.predict(data, False)
-        self.layers[-1].thresholdOutputs(L, H)
         # Weight change for last layer
-        self.layers[-1].setLabel(labels)
+        self.predict(data, one_hot=False)
+        self.layers[-1].setLabel(label)
+        self.layers[-1].thresholdOutputs(L, H)
         self.layers[-1].getWChange(eta, alpha)
         # Back-prop error
         for i in range(len(self.layers)-2, -1, -1):
