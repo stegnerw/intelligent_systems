@@ -1,7 +1,6 @@
 ###############################################################################
 # Imports
 ###############################################################################
-from activation import *
 import numpy as np
 
 
@@ -9,15 +8,16 @@ class Layer:
     def __init__(
             self,
             weight_file = None,
-            shape = None,
+            hidden_neurons = None,
+            inputs = None,
         ):
         '''Initialize Layer object either randomly or by a weight file
         Parameters:
         -----------
             weight_file : str, optional
                 File to load pre-existing weights from
-            shape : tuple of int, optional
-                Dimensions of the layer in the form (num_neurons, num_inputs)
+            hidden_neurons, inputs : int, optional
+                Number of hidden neurons and inputs to the layer
         Returns:
         --------
             Layer
@@ -25,8 +25,11 @@ class Layer:
         '''
         if weight_file:
             self.loadWeights(weight_file)
+            self.hidden_neurons = self.w.shape[0]
+            self.inputs = self.w.shape[1] - 1
         else:
-            self.shape = shape
+            self.hidden_neurons = hidden_neurons
+            self.inputs = inputs
             self.initW()
         # States to save for back-prop
         self.x = None # Input for current pass
@@ -44,9 +47,9 @@ class Layer:
         --------
             None
         '''
-        # Uniform initialization from -1 to 1
-        w_shape = (self.shape[0], self.shape[1] + 1)
-        self.w = np.random.uniform(-1, 1, size=w_shape)
+        w_shape = (self.hidden_neurons, self.inputs + 1)
+        a = np.sqrt(3 / (self.inputs + 1))
+        self.w = np.random.uniform(-a, a, size=w_shape)
         self.w_change = np.zeros(self.w.shape)
 
     def forwardPass(self, x):
@@ -65,9 +68,9 @@ class Layer:
         # Save inputs for back-prop
         self.x = x
         # Dot product weights * inputs
-        self.s = np.matmul(self.w, x)
+        self.s = np.dot(self.w, x)
         # Pass through sigmoid activation
-        self.y = sigmoid(self.s)
+        self.y = 1.0 / (1 + np.exp(-self.s))
         return self.y
 
     def setDelta(self):
@@ -76,7 +79,7 @@ class Layer:
         '''
         raise NotImplementedError('Cannot call from Layer class')
 
-    def getWChange(self, eta=1.0, alpha=0.1):
+    def getWChange(self, eta=0.1, alpha=0.8):
         '''Calculate weight updates for the most recent forward pass
         Requires delta to be calculated (varies between hidden/output layers)
         Parameters:

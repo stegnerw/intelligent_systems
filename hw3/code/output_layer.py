@@ -2,7 +2,6 @@
 # Imports
 ###############################################################################
 from layer import Layer
-from activation import *
 import numpy as np
 
 
@@ -30,7 +29,7 @@ class OutputLayer(Layer):
             None
         '''
         e = self.label - self.y
-        y_der = sigmoid_der(self.s)
+        y_der = self.y * (1 - self.y)
         self.delta = e * y_der
 
     def thresholdOutputs(self, L, H):

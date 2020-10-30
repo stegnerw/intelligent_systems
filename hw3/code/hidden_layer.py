@@ -2,7 +2,6 @@
 # Imports
 ###############################################################################
 from layer import Layer
-from activation import *
 import numpy as np
 
 
@@ -20,7 +19,7 @@ class HiddenLayer(Layer):
         --------
             None
         '''
-        self.downstream_sum = np.matmul(w[:, :-1].transpose(), delta)
+        self.downstream_sum = np.dot(delta, w[:, :-1])
 
     def setDelta(self):
         '''Calculate delta for the hidden layer
@@ -31,7 +30,8 @@ class HiddenLayer(Layer):
         --------
             None
         '''
-        output_der = sigmoid_der(self.s)
+        # Derivative of sigmoid using last forward pass
+        output_der = self.y * (1 - self.y)
         self.delta = output_der * self.downstream_sum
 
 
