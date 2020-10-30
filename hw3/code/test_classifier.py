@@ -2,8 +2,8 @@
 # Imports
 ###############################################################################
 # Custom imports
-from classifier import Classifier
 from settings import *
+from classifier import Classifier
 # External imports
 import numpy as np
 import pathlib
@@ -42,9 +42,9 @@ def makeConfMat(classifier, data, labels, plot_name, title):
             plt.text(j, i, f'{int(conf_mat[i][j])}',
                     va='center', ha='center', color=color)
     plt.xlabel('Predicted Value')
-    plt.xticks(range(num_classes))
+    plt.xticks(range(CLASSES))
     plt.ylabel('Actual Value')
-    plt.yticks(range(num_classes))
+    plt.yticks(range(CLASSES))
     plt.colorbar()
     plt.savefig(str(plot_name))
     plt.close()
