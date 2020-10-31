@@ -1,0 +1,9 @@
+Parameter,Value,Description
+$hidden\_layer\_size$,192,Neurons in hidden layer
+$\eta$,0.005,Learning rate
+$\alpha$,0.8,Momentum
+$max\_epochs$,500,Maximum training epochs
+$L$,0,Lower activation threshold
+$H$,1,Upper activation threshold
+$patience$,3,Patience before early stopping
+$es\_delta$,0.1,Delta value for early stopping

@@ -26,20 +26,13 @@ def drawFeatures(weights, dir_name):
         w = w[1:]
         w -= w.min()
         w /= (w.max() - w.min())
-        w_name = dir_name.joinpath(f'feature_{i:02d}.png')
+        w_name = dir_name.joinpath(f'feat_{i:02d}.png')
         matplotlib.image.imsave(str(w_name), w.reshape(28, 28, order='F'),
                 cmap='Greys_r')
 
 
 # Seed for consistency
-np.random.seed(69420)
-# File locations
-CLASS_MODEL_DIR = CODE_DIR.joinpath('classifier')
-CLASS_FEAT_DIR = IMG_DIR.joinpath(f'classifier_features')
-CLASS_FEAT_DIR.mkdir(mode=0o775, exist_ok=True)
-AUTO_MODEL_DIR = CODE_DIR.joinpath('autoencoder')
-AUTO_FEAT_DIR = IMG_DIR.joinpath(f'autoencoder_features')
-AUTO_FEAT_DIR.mkdir(mode=0o775, exist_ok=True)
+np.random.seed(SEED)
 # Load best weights back up for each model
 autoencoder = Autoencoder(input_size=INPUTS)
 for weight_file in sorted(AUTO_MODEL_DIR.iterdir()):
@@ -48,7 +41,7 @@ classifier = Classifier(input_size=INPUTS)
 for weight_file in sorted(CLASS_MODEL_DIR.iterdir()):
     classifier.addLayer(file_name=weight_file)
 # Neurons to check
-neuron_count = classifier.layers[0].hidden_neurons
+neuron_count = classifier.layers[0].num_neurons
 neurons = np.random.choice(np.arange(neuron_count), 20, replace=False)
 class_weights = classifier.layers[0].w[neurons]
 drawFeatures(class_weights, CLASS_FEAT_DIR)

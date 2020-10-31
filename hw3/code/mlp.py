@@ -32,7 +32,7 @@ class MLP:
         if len(self.layers) == 0:
             input_size = self.input_size
         else:
-            input_size = self.layers[-1].hidden_neurons
+            input_size = self.layers[-1].num_neurons
         if file_name:
             if output:
                 self.layers.append(OutputLayer(weight_file=file_name))
@@ -40,10 +40,10 @@ class MLP:
                 self.layers.append(HiddenLayer(weight_file=file_name))
         else:
             if output:
-                self.layers.append(OutputLayer(hidden_neurons=neurons,
+                self.layers.append(OutputLayer(num_neurons=neurons,
                     inputs=input_size))
             else:
-                self.layers.append(HiddenLayer(hidden_neurons=neurons,
+                self.layers.append(HiddenLayer(num_neurons=neurons,
                     inputs=input_size))
 
     def predict(self, data, one_hot):
@@ -146,6 +146,7 @@ class MLP:
             L,
             H,
             patience,
+            es_delta,
             save_dir,
         ):
         '''Train the network up to the desired number of epochs
@@ -168,8 +169,10 @@ class MLP:
                 Momentum scalar
             L, H : float
                 Low and high thresholds for training
-            patience : int, optional
+            patience : int
                 Amount of epochs with no improvement before early stopping
+            es_delta : float
+                Required improvement for early stopping
             save_dir : pathlib.Path or str
                 Directory to save best model parameters in
         '''
@@ -200,6 +203,7 @@ class MLP:
         # Iterate through epochs or until early stopping
         impatience = 0
         self.best_weights_epoch = 0
+        best_loss = np.inf
         for e in range(1, max_epochs+1):
             pbar.update()
             shufflePair(train_data, train_labels)
@@ -217,9 +221,10 @@ class MLP:
                         e,
                 )
                 # Check for early stopping
-                if (min(self.valid_err) == self.valid_err[-1]):
+                if ((best_loss - self.valid_err[-1]) >= es_delta):
                     impatience = 0
                     self.best_weights_epoch = e
+                    best_loss = self.valid_err[-1]
                     for i, l in enumerate(self.layers):
                         layer_name = save_dir.joinpath(f'layer_{i:02d}')
                         l.saveWeights(layer_name)

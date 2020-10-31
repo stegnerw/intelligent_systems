@@ -2,8 +2,6 @@
 # Imports
 ###############################################################################
 # Custom imports
-from settings import *
-from dataset import shufflePair
 from mlp import MLP
 # External imports
 import numpy as np
@@ -36,43 +34,37 @@ class Classifier(MLP):
 
 
 if __name__ == '__main__':
-    # Seed for consistency
-    np.random.seed(69420)
     # Additional imports
+    from settings import *
     import pathlib
-    # File locations
-    PLT_NAME = IMG_DIR.joinpath(f'classifier_loss.png')
-    MODEL_DIR = CODE_DIR.joinpath('classifier')
-    MODEL_DIR.mkdir(mode=0o775, exist_ok=True)
-    for f in MODEL_DIR.iterdir():
+    import csv
+    # Seed for consistency
+    np.random.seed(SEED)
+    # Delete old model
+    for f in CLASS_MODEL_DIR.iterdir():
         f.unlink()
-    # Training constants
-    POINTS_PER_EPOCH = 1000
-    VALID_POINTS = 1000
-    MAX_EPOCHS=1000
-    ETA = 0.01
-    ALPHA = 0.8
-    L = 0.25
-    H = 0.75
-    PATIENCE = 5
     # Test network
     classifier = Classifier(input_size=INPUTS)
-    classifier.addLayer(neurons=HIDDEN_NEURONS, output=False)
+    for h in HIDDEN_LAYER_SIZES:
+        classifier.addLayer(neurons=h, output=False)
     classifier.addLayer(neurons=CLASSES, output=True)
-   # Train the network
+    # Train the network
+    print('* * * Begin training classifier * * *')
     classifier.train(
         train_data,
         train_labels,
-        points_per_epoch=POINTS_PER_EPOCH,
-        valid_points=VALID_POINTS,
-        max_epochs=MAX_EPOCHS,
-        eta=ETA,
-        alpha=ALPHA,
-        L=L,
-        H=H,
-        patience=PATIENCE,
-        save_dir=MODEL_DIR,
+        points_per_epoch=CLASS_POINTS_PER_EPOCH,
+        valid_points=CLASS_VALID_POINTS,
+        max_epochs=CLASS_MAX_EPOCHS,
+        eta=CLASS_ETA,
+        alpha=CLASS_ALPHA,
+        L=CLASS_L,
+        H=CLASS_H,
+        patience=CLASS_PATIENCE,
+        es_delta=CLASS_ES_DELTA,
+        save_dir=CLASS_MODEL_DIR,
     )
+    # Plot loss over epochs
     plt.figure()
     plt.plot(classifier.epoch_num, classifier.train_err)
     plt.plot(classifier.epoch_num, classifier.valid_err)
@@ -82,8 +74,28 @@ if __name__ == '__main__':
     plt.xlabel('Epoch number')
     plt.xlim([0, classifier.epoch_num[-1]])
     plt.ylabel('Loss')
-    plt.ylim([0, max(classifier.train_err[0], classifier.valid_err[0])])
-    plt.tight_layout()
-    plt.savefig(str(PLT_NAME), bbox_inches='tight', pad_inches=0)
+    plt.ylim([0, max(max(classifier.train_err), max(classifier.valid_err))])
+    plt.savefig(str(CLASS_LOSS_PLOT), bbox_inches='tight', pad_inches=0)
     plt.close()
+    # Save parameters to CSV
+    csv_rows = list()
+    csv_rows.append(['Parameter', 'Value', 'Description'])
+    csv_rows.append(['$hidden\\_layer\\_size$', str(HIDDEN_LAYER_SIZES[0]),
+        'Neurons in hidden layer'])
+    csv_rows.append(['$\\eta$', str(CLASS_ETA), 'Learning rate'])
+    csv_rows.append(['$\\alpha$', str(CLASS_ALPHA), 'Momentum'])
+    csv_rows.append(['$max\\_epochs$', str(CLASS_MAX_EPOCHS),
+        'Maximum training epochs'])
+    csv_rows.append(['$L$', str(CLASS_L), 'Lower activation threshold'])
+    csv_rows.append(['$H$', str(CLASS_H), 'Upper activation threshold'])
+    csv_rows.append(['$patience$', str(CLASS_PATIENCE),
+        'Patience before early stopping'])
+    csv_rows.append(['$es\\_delta$', str(CLASS_ES_DELTA),
+        'Delta value for early stopping'])
+    with open(str(CLASS_PARAM_CSV), 'w') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerows(csv_rows)
+    # Write best epoch
+    with open(str(CLASS_BEST_EPOCH), 'w') as best_epoch_file:
+        best_epoch_file.write(str(classifier.best_weights_epoch))
 

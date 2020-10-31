@@ -1,10 +1,7 @@
 ###############################################################################
-# Imports ###############################################################################
-# Custom imports
-from settings import *
-from dataset import shufflePair
+# Imports
+###############################################################################
 from mlp import MLP
-# External imports
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -34,42 +31,36 @@ class Autoencoder(MLP):
 
 
 if __name__ == '__main__':
-    # Seed for consistency
-    np.random.seed(69420)
     # Additional imports
+    from settings import *
     import pathlib
-    # File locations
-    PLT_NAME = IMG_DIR.joinpath(f'autoencoder_loss.png')
-    MODEL_DIR = CODE_DIR.joinpath('autoencoder')
-    MODEL_DIR.mkdir(mode=0o775, exist_ok=True)
-    for f in MODEL_DIR.iterdir():
+    import csv
+    # Seed for consistency
+    np.random.seed(SEED)
+    # Delete old model
+    for f in AUTO_MODEL_DIR.iterdir():
         f.unlink()
     # Training constants
-    POINTS_PER_EPOCH = 1000
-    VALID_POINTS = 1000
-    MAX_EPOCHS=1000
-    ETA = 0.005
-    ALPHA = 0.8
-    L = 0
-    H = 1
-    PATIENCE = 5
     # Test network
     autoencoder = Autoencoder(input_size=INPUTS)
-    autoencoder.addLayer(neurons=HIDDEN_NEURONS, output=False)
+    for h in HIDDEN_LAYER_SIZES:
+        autoencoder.addLayer(neurons=h, output=False)
     autoencoder.addLayer(neurons=INPUTS, output=True)
     # Train the network
+    print('* * * Begin training autoencoder * * *')
     autoencoder.train(
         train_data,
         train_data,
-        points_per_epoch=POINTS_PER_EPOCH,
-        valid_points=VALID_POINTS,
-        max_epochs=MAX_EPOCHS,
-        eta=ETA,
-        alpha=ALPHA,
-        L=L,
-        H=H,
-        patience=PATIENCE,
-        save_dir=MODEL_DIR,
+        points_per_epoch=AUTO_POINTS_PER_EPOCH,
+        valid_points=AUTO_VALID_POINTS,
+        max_epochs=AUTO_MAX_EPOCHS,
+        eta=AUTO_ETA,
+        alpha=AUTO_ALPHA,
+        L=AUTO_L,
+        H=AUTO_H,
+        patience=AUTO_PATIENCE,
+        es_delta=AUTO_ES_DELTA,
+        save_dir=AUTO_MODEL_DIR,
     )
     plt.figure()
     plt.plot(autoencoder.epoch_num, autoencoder.train_err)
@@ -80,8 +71,29 @@ if __name__ == '__main__':
     plt.xlabel('Epoch number')
     plt.xlim([0, autoencoder.epoch_num[-1]])
     plt.ylabel('Loss')
-    plt.ylim([0, max(autoencoder.train_err[0], autoencoder.valid_err[0])])
-    plt.tight_layout()
-    plt.savefig(str(PLT_NAME), bbox_inches='tight', pad_inches=0)
+    plt.ylim([0, max(max(autoencoder.train_err), max(autoencoder.valid_err))])
+    plt.savefig(str(AUTO_LOSS_PLOT), bbox_inches='tight', pad_inches=0)
     plt.close()
+    # Save parameters to CSV
+    print('Saving training parameters')
+    csv_rows = list()
+    csv_rows.append(['Parameter', 'Value', 'Description'])
+    csv_rows.append(['$hidden\\_layer\\_size$', str(HIDDEN_LAYER_SIZES[0]),
+        'Neurons in hidden layer'])
+    csv_rows.append(['$\\eta$', str(AUTO_ETA), 'Learning rate'])
+    csv_rows.append(['$\\alpha$', str(AUTO_ALPHA), 'Momentum'])
+    csv_rows.append(['$max\\_epochs$', str(AUTO_MAX_EPOCHS),
+        'Maximum training epochs'])
+    csv_rows.append(['$L$', str(AUTO_L), 'Lower activation threshold'])
+    csv_rows.append(['$H$', str(AUTO_H), 'Upper activation threshold'])
+    csv_rows.append(['$patience$', str(AUTO_PATIENCE),
+        'Patience before early stopping'])
+    csv_rows.append(['$es\\_delta$', str(AUTO_ES_DELTA),
+        'Delta value for early stopping'])
+    with open(str(AUTO_PARAM_CSV), 'w') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerows(csv_rows)
+    # Write best epoch
+    with open(str(AUTO_BEST_EPOCH), 'w') as best_epoch_file:
+        best_epoch_file.write(str(autoencoder.best_weights_epoch))
 

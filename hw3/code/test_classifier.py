@@ -52,21 +52,22 @@ def makeConfMat(classifier, data, labels, plot_name, title):
 
 
 # Seed for consistency
-np.random.seed(69420)
+np.random.seed(SEED)
 # File locations
-TRAIN_CONF_NAME = IMG_DIR.joinpath(f'train_conf_mat.png')
-TEST_CONF_NAME = IMG_DIR.joinpath(f'test_conf_mat.png')
-MODEL_DIR = CODE_DIR.joinpath('classifier')
 # Load best weights back up and make confusion matrices
 classifier = Classifier(input_size=INPUTS)
-for weight_file in sorted(MODEL_DIR.iterdir()):
-    classifier.addLayer(file_name=weight_file)
+weight_files = sorted(CLASS_MODEL_DIR.iterdir())
+for weight_file in weight_files[:-1]:
+    classifier.addLayer(file_name=weight_file, output=False)
+classifier.addLayer(file_name=weight_files[-1], output=True)
 train_conf_title = 'Train Confusion Matrix'
-makeConfMat(classifier, train_data, train_labels, TRAIN_CONF_NAME,
+makeConfMat(classifier, train_data, train_labels, CLASS_TRAIN_CONF,
         title=train_conf_title)
 test_conf_title = 'Test Confusion Matrix'
-makeConfMat(classifier, test_data, test_labels, TEST_CONF_NAME,
+makeConfMat(classifier, test_data, test_labels, CLASS_TEST_CONF,
         title=test_conf_title)
 test_err = classifier.eval(test_data, test_labels)
 print(f'Test error: {test_err:0.3f}')
+with open(str(CLASS_TEST_LOSS), 'w') as loss_f:
+    loss_f.write(f'{test_err:0.3f}')
 

@@ -1,6 +1,7 @@
 ###############################################################################
 # Imports
 ###############################################################################
+from settings import *
 import numpy as np
 import pathlib
 import matplotlib.pyplot as plt
@@ -24,21 +25,19 @@ def shufflePair(data, labels):
 
 
 if __name__ == '__main__':
+    # # Define important values from settings
+    # SEED = 69420
+    # CODE_DIR = pathlib.Path(__file__).parent.absolute()
+    # DATA_FILE = CODE_DIR.joinpath('data.txt')
+    # LABEL_FILE = CODE_DIR.joinpath('labels.txt')
+    # DATASET_DIR = CODE_DIR.joinpath('dataset')
+    # DATASET_DIR.mkdir(mode=0o755, exist_ok=True)
+    # TRAIN_DATA_FILE = DATASET_DIR.joinpath('train_data.npy')
+    # TRAIN_LABELS_FILE = DATASET_DIR.joinpath('train_labels.npy')
+    # TEST_DATA_FILE = DATASET_DIR.joinpath('test_data.npy')
+    # TEST_LABELS_FILE = DATASET_DIR.joinpath('test_labels.npy')
     # Seed for consistency
-    np.random.seed(69420)
-    # File location definitions
-    CODE_DIR = pathlib.Path(__file__).parent.absolute()
-    DATA_FILE = CODE_DIR.joinpath('data.txt')
-    LABEL_FILE = CODE_DIR.joinpath('labels.txt')
-    # Processed dataset storage
-    DATASET_DIR = CODE_DIR.joinpath('dataset')
-    DATASET_DIR.mkdir(mode=0o775, exist_ok=True)
-    TRAIN_DATA_FILE = DATASET_DIR.joinpath('train_data')
-    TRAIN_LABEL_FILE = DATASET_DIR.joinpath('train_labels')
-    TEST_DATA_FILE = DATASET_DIR.joinpath('test_data')
-    TEST_LABEL_FILE = DATASET_DIR.joinpath('test_labels')
-    # Constant definitions
-    TRAIN_PORTION = 0.8
+    np.random.seed(SEED)
     ###########################################################################
     # Import dataset
     ###########################################################################
@@ -102,7 +101,7 @@ if __name__ == '__main__':
     # Save arrays
     ###########################################################################
     np.save(str(TRAIN_DATA_FILE), train_data)
-    np.save(str(TRAIN_LABEL_FILE), train_labels)
+    np.save(str(TRAIN_LABELS_FILE), train_labels)
     np.save(str(TEST_DATA_FILE), test_data)
-    np.save(str(TEST_LABEL_FILE), test_labels)
+    np.save(str(TEST_LABELS_FILE), test_labels)
 

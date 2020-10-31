@@ -8,7 +8,7 @@ class Layer:
     def __init__(
             self,
             weight_file = None,
-            hidden_neurons = None,
+            num_neurons = None,
             inputs = None,
         ):
         '''Initialize Layer object either randomly or by a weight file
@@ -16,7 +16,7 @@ class Layer:
         -----------
             weight_file : str, optional
                 File to load pre-existing weights from
-            hidden_neurons, inputs : int, optional
+            num_neurons, inputs : int, optional
                 Number of hidden neurons and inputs to the layer
         Returns:
         --------
@@ -25,10 +25,10 @@ class Layer:
         '''
         if weight_file:
             self.loadWeights(weight_file)
-            self.hidden_neurons = self.w.shape[0]
+            self.num_neurons = self.w.shape[0]
             self.inputs = self.w.shape[1] - 1
         else:
-            self.hidden_neurons = hidden_neurons
+            self.num_neurons = num_neurons
             self.inputs = inputs
             self.initW()
         # States to save for back-prop
@@ -39,7 +39,7 @@ class Layer:
         self.w_change = np.zeros(self.w.shape) # Weight changes
 
     def initW(self):
-        '''Initialize weights for the perceptron
+        '''Initialize weights for the perceptron using Xavier initialization
         Parameters:
         -----------
             None
@@ -47,9 +47,9 @@ class Layer:
         --------
             None
         '''
-        w_shape = (self.hidden_neurons, self.inputs + 1)
-        a = np.sqrt(2 / (self.inputs))
-        self.w = np.random.normal(scale=a, size=w_shape)
+        w_shape = (self.num_neurons, self.inputs + 1)
+        a = np.sqrt(6 / (self.inputs + self.num_neurons))
+        self.w = np.random.uniform(-a, a, size=w_shape)
         self.w_change = np.zeros(self.w.shape)
 
     def forwardPass(self, x):
@@ -139,24 +139,5 @@ class Layer:
 
 
 if __name__ == '__main__':
-    # Seed for consistency
-    np.random.seed(69420)
-    # Additional imports
-    from dataset import Dataset
-    import pathlib
-    # File locations
-    CODE_DIR = pathlib.Path(__file__).parent.absolute()
-    ROOT_DIR = CODE_DIR.parent
-    DATA_FILE = CODE_DIR.joinpath('data.txt')
-    LABEL_FILE = CODE_DIR.joinpath('labels.txt')
-    IMG_DIR = ROOT_DIR.joinpath('images')
-    IMG_DIR.mkdir(mode=0o775, exist_ok=True)
-    # Test layer
-    layer = Layer(10, 784)
-    # Create dataset
-    dataset = Dataset(DATA_FILE, LABEL_FILE)
-    dataset.shuffleData(train=True, test=True)
-    # Test forward pass
-    for d, l in zip(dataset.test_data, dataset.test_labels):
-        print(layer.forwardPass(d))
+    print('Warning: Tests for this file are deprecated')
 
