@@ -90,7 +90,9 @@ print(f'Test loss: {test_err:0.3f}')
 sample_title = 'Autoencoder Sample Outputs'
 drawSamples(autoencoder, test_data, 8, SAMPLE_DIR, sample_title)
 # Graph loss by class
+print('Testing train set')
 train_loss = getLossByClass(autoencoder, train_data, train_labels)
+print('Testing test set')
 test_loss = getLossByClass(autoencoder, test_data, test_labels)
 x = np.arange(len(train_loss))
 plt.figure()
@@ -105,5 +107,5 @@ plt.grid(axis='y')
 plt.gca().set_axisbelow(True)
 plt.legend(loc='lower right')
 plt.tight_layout()
-plt.savefig(str(BAR_NAME))
+plt.savefig(str(BAR_NAME), bbox_inches='tight', pad_inches=0)
 

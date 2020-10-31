@@ -83,6 +83,7 @@ if __name__ == '__main__':
     plt.xlim([0, classifier.epoch_num[-1]])
     plt.ylabel('Loss')
     plt.ylim([0, max(classifier.train_err[0], classifier.valid_err[0])])
-    plt.savefig(str(PLT_NAME))
+    plt.tight_layout()
+    plt.savefig(str(PLT_NAME), bbox_inches='tight', pad_inches=0)
     plt.close()
 

@@ -22,8 +22,11 @@ def drawFeatures(weights, dir_name):
             Name of the directory to save the images to
     '''
     for i, w in enumerate(weights):
+        # Remove bias and normalize on [0, 1]
         w = w[1:]
-        w_name = dir_name.joinpath(f'feature_{i}.png')
+        w -= w.min()
+        w /= (w.max() - w.min())
+        w_name = dir_name.joinpath(f'feature_{i:02d}.png')
         matplotlib.image.imsave(str(w_name), w.reshape(28, 28, order='F'),
                 cmap='Greys_r')
 

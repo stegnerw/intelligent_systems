@@ -46,7 +46,8 @@ def makeConfMat(classifier, data, labels, plot_name, title):
     plt.ylabel('Actual Value')
     plt.yticks(range(CLASSES))
     plt.colorbar()
-    plt.savefig(str(plot_name))
+    plt.tight_layout()
+    plt.savefig(str(plot_name), bbox_inches='tight', pad_inches=0)
     plt.close()
 
 
