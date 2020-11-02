@@ -1,0 +1,112 @@
+EECE6036 Homework 3
+
+* * * * * * TL;DR * * * * * *
+
+The dataset is pre-partitioned, but run dataset.py to repartition it.
+
+The networks are pre-trained, but run classifier.py to train the classifier or
+autoencoder.py to train the autoencoder.
+WARNING: This will delete the pre-trained models.
+
+To test the networks, run test_autoencoder.py and test_classifier.py.
+
+To extract the features, run features.py.
+
+* * * * * * Directory Structure * * * * * *
+
+This project has the following directory structure:
+<base directory>/
+  code/
+    auto/
+      <best pre-trained autoencoder weights>
+    class/
+      <best pre-trained classifier weights>
+    dataset/
+      <pre-partitioned test/train data/labels saved as numpy arrays>
+    data.txt
+    labels.txt
+    <python source files>
+    <bash scripts for running test/train/all>
+  data/
+    <generated data>
+  images/
+    <generated images>
+  README
+  requirements.txt
+
+* * * * * * Parameter Settings * * * * * *
+
+All of the hyper-parameters are set in settings.py.
+If you want to change them, edit them in settings.py under the Constant Values
+heading.
+
+HIDDEN_LAYER_SIZES takes a list of ints, where the length of the list is the
+number of hidden layers, and each int defines the amount of neurons in each
+layer.
+
+* * * * * * Running the Code * * * * * *
+
+It runs in Python 3, but I specifically tested it with Python 3.6.9.
+It will NOT run in Python 2.
+
+To run the each file, run the following command from the code/ directory:
+
+python3 <file_name>
+
+Note: Depending on how you installed Python, you might replace python3 with
+python
+
+dataset.py - partition the dataset into test/train.
+This is not necessary to run because I have included the partitioned dataset
+in my submission.
+
+classifier.py/autoencoder.py - Trains the classifier/autoencoder models and
+saves the best weights, training parameters, and the loss over epochs graph.
+WARNING: These files delete the current model before beginning training, then
+save a new set of weights every 10 epochs.
+
+test_classifier.py/test_autoencoder.py - Tests the classifier/autoencoder
+models loaded up from the class/auto directories.
+Generates all necessary plots for the report, as well as the autoencoder sample
+outputs.
+
+features.py - Selects random features from the classifier and autoencoder for
+the report.
+
+The rest of the source files are classes which do not run but are used to
+implement the training.
+
+I have included 3 bash scripts to facilitate running the necessary files
+automatically in the correct order.
+The scripts are as follows:
+
+run_train.sh - Runs the files classifier.py and autoencoder.py to train the
+models.
+
+run_test.sh - Runs the files test_classifier.py, test_autoencoder.py, and
+features.py to test the models and extract features.
+
+run_all.sh - First runs dataset.py to partition the dataset into test/train,
+then runs run_test.sh and then run_train.sh.
+
+I don't know if they will run on Windows because I don't know if you can run
+bash on Windows, so you might have to run the files manually.
+
+* * * * * * Dependencies * * * * * *
+
+The following are the package dependencies.
+  - numpy (1.19.2)
+  - matplotlib (3.3.1)
+  - enlighten (1.6.2)
+It is very likely that numpy and matplotlib are already installed, but you
+might not have enlighten.
+Enlighten is used for progress bars for training, but is not used in the other
+files.
+You only need enlighten if you want to run my training code.
+To install all necessary requirements, run the following command in the base
+directory as the project:
+
+pip3 install -r requirements.txt
+
+Note: Depending on how you installed Python, you might replace pip3 with pip.
+
