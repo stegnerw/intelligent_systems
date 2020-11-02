@@ -32,7 +32,7 @@
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{1.0,1.0,1.0}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 \lstdefinestyle{mystyle}{
   backgroundcolor=\color{backcolour},
   commentstyle=\color{codegreen},
@@ -288,6 +288,11 @@
   Between the two feature sets, there is a trend where the center of the image
   appears to have some distinct patterns, while the edge of the image is either
   somewhat uniform gray or random TV static.
+  This trend makes sense because the digits in the images tended to be
+  mostly centered, so the edge pixels mostly contained 0.
+  When the presented input is 0, the weight delta is 0 according to the
+  back-propagation formula, meaning that the edge of the images did not get
+  updated as much as the center of the image.
   In \figRef{fig:class_feat}, the shapes generally seem to be lines or curves,
   while in \figRef{fig:auto_feat} the features look like a bunch of dark dots
   with a few brighter spots.
@@ -302,6 +307,8 @@
   \pagebreak
   \appendix
   \section{Code}
+  \subsection{\texttt{settings.py}}
+  \lstinputlisting[language=python]{"code/settings.py"}
   \subsection{\texttt{dataset.py}}
   \lstinputlisting[language=python]{"code/dataset.py"}
   \subsection{\texttt{layer.py}}

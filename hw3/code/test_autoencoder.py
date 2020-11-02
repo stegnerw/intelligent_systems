@@ -12,7 +12,15 @@ import matplotlib.pyplot as plt
 
 
 def splitClasses(data, labels):
-    '''
+    '''Split up dataset by class
+    Parameters
+    ----------
+    data, labels : np.ndarray
+        Arrays of data points and labels
+    Returns
+    -------
+    list
+        Data split up by class
     '''
     split_data = list()
     for i in range(CLASSES):
@@ -24,6 +32,16 @@ def splitClasses(data, labels):
 
 def getLossByClass(autoencoder, data, labels):
     '''
+    Parameters
+    ----------
+    autoencoder : Autoencoder
+        Autoencoder for use in loss calculation
+    data, labels : np.ndarray
+        Arrays of data points and labels
+    Returns
+    -------
+    float
+        Loss values by class
     '''
     loss = list()
     split_data = splitClasses(data, labels)
@@ -34,34 +52,34 @@ def getLossByClass(autoencoder, data, labels):
 
 def getSamplePoints(data, n):
     '''Get sample points from the given data set
-    Parameters:
-    -----------
-        data : np.ndarray
-            Array of data points
-        n : int
-            Number of sample points
-    Returns:
-    --------
-        np.ndarray
-            Reduced list of data points
+    Parameters
+    ----------
+    data : np.ndarray
+        Array of data points
+    n : int
+        Number of sample points
+    Returns
+    -------
+    np.ndarray
+        Reduced list of data points
     '''
     indeces = np.random.choice(np.arange(len(data)), 8, replace=False)
     return data[indeces]
 
 def drawSamples(autoencoder, data, num_samples, dir_name, title):
     '''Draw the output predictions and save them
-    Parameters:
-    -----------
-        autoencoder : Autoencoder
-            Autoencoder for use in inference
-        data : np.ndarray
-            Array of data points
-        num_samples : int
-            Number of sample points
-        dir_name : str
-            Name of the directory to save the images to
-        title : str
-            Title of the plot
+    Parameters
+    ----------
+    autoencoder : Autoencoder
+        Autoencoder for use in inference
+    data : np.ndarray
+        Array of data points
+    num_samples : int
+        Number of sample points
+    dir_name : str
+        Name of the directory to save the images to
+    title : str
+        Title of the plot
     '''
     sample_points = getSamplePoints(data, num_samples)
     for i, d in enumerate(sample_points):

@@ -9,24 +9,15 @@ class OutputLayer(Layer):
     def setLabel(self, label):
         '''Set the labels for this batch
         Needed for calculating delta for this layer
-        Parameters:
-        -----------
-            label : np.ndarray
-                One-hot encoded label
-        Returns:
-        --------
-            None
+        Parameters
+        ----------
+        label : np.ndarray
+            One-hot encoded label
         '''
         self.label = label
 
     def setDelta(self):
         '''Calculate delta for the output layer
-        Parameters:
-        -----------
-            None
-        Returns:
-        --------
-            None
         '''
         e = self.label - self.y
         y_der = self.y * (1 - self.y)
@@ -34,13 +25,10 @@ class OutputLayer(Layer):
 
     def thresholdOutputs(self, L, H):
         '''Threshold outputs based on the labels
-        Parameters:
-        -----------
-            L, H: float
-                Low and high thresholds for outputs
-        Returns:
-        --------
-            None
+        Parameters
+        ----------
+        L, H: float
+            Low and high thresholds for outputs
         '''
         self.y[(self.y <= L) * (self.label == 0)] = 0
         self.y[(self.y >= H) * (self.label == 1)] = 1

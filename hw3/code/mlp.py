@@ -16,19 +16,19 @@ class MLP:
             self,
             input_size=INPUTS,
         ):
-        '''Initialize Multi-Layer Perceptron object
-        Parameters:
-        -----------
-            input_size : int
-                Number of inputs to the network
-        '''
+        """Initialize Multi-Layer Perceptron object
+        Parameters
+        ----------
+        input_size : int
+            Number of inputs to the network
+        """
         # Initialize parameters
         self.layers = list()
         self.input_size = input_size
 
     def addLayer(self, file_name=None, neurons=None, output=False):
-        '''Add a layer to the network
-        '''
+        """Add a layer to the network
+        """
         if len(self.layers) == 0:
             input_size = self.input_size
         else:
@@ -47,18 +47,18 @@ class MLP:
                     inputs=input_size))
 
     def predict(self, data, one_hot):
-        '''Predict the output given an input
-        Parameters:
-        -----------
-            data : np.ndarray
-                Data point to predict on
-            one_hot : bool
-                Whether the output should be one-hot or raw
-        Returns:
-        --------
-            np.ndarray
-                Array of prediction
-        '''
+        """Predict the output given an input
+        Parameters
+        ----------
+        data : np.ndarray
+            Data point to predict on
+        one_hot : bool
+            Whether the output should be one-hot or raw
+        Returns
+        -------
+        np.ndarray
+            Array of prediction
+        """
         # Forward pass through all the layers
         layer_output = data
         for l in self.layers:
@@ -71,20 +71,20 @@ class MLP:
         return pred
 
     def trainPoint(self, data, label, eta, alpha, L, H):
-        '''Update the weights for a single point
-        Parameters:
-        -----------
-            data : np.ndarray
-                The data point
-            labels : np.ndarray
-                One-hot encoded label
-            eta : float
-                Learning rate
-            alpha : float
-                Momentum scalar
-            L, H : float, optional
-                Low and high thresholds for training
-        '''
+        """Update the weights for a single point
+        Parameters
+        ----------
+        data : np.ndarray
+            The data point
+        labels : np.ndarray
+            One-hot encoded label
+        eta : float
+            Learning rate
+        alpha : float
+            Momentum scalar
+        L, H : float, optional
+            Low and high thresholds for training
+        """
         # Weight change for last layer
         self.predict(data, one_hot=False)
         self.layers[-1].setLabel(label)
@@ -107,20 +107,20 @@ class MLP:
             valid_labels,
             epoch_num,
         ):
-        '''Log error for train/test data for a given epoch
-        Parameters:
-        -----------
-            train_data : np.ndarray
-                Array of data points for the train set
-            train_labels : np.ndarray
-                Array of labels for the train set
-            valid_data : np.ndarray
-                Array of data points for the validation set
-            valid_labels : np.ndarray
-                Array of labels for the validation set
-            epoch_num : int
-                The current epoch number
-        '''
+        """Log error for train/test data for a given epoch
+        Parameters
+        ----------
+        train_data : np.ndarray
+            Array of data points for the train set
+        train_labels : np.ndarray
+            Array of labels for the train set
+        valid_data : np.ndarray
+            Array of data points for the validation set
+        valid_labels : np.ndarray
+            Array of labels for the validation set
+        epoch_num : int
+            The current epoch number
+        """
         # Evaluate and log train error
         train_err = self.eval(train_data, train_labels)
         self.train_err.append(train_err)
@@ -134,8 +134,7 @@ class MLP:
         print(f'\tTrain Loss:\t\t{train_err:0.03f}')
         print(f'\tValidation Loss:\t{valid_err:0.03f}')
 
-    def train(
-            self,
+    def train(self,
             data,
             labels,
             points_per_epoch,
@@ -149,33 +148,31 @@ class MLP:
             es_delta,
             save_dir,
         ):
-        '''Train the network up to the desired number of epochs
+        """Train the network up to the desired number of epochs
         Parameters:
         -----------
-            data : np.ndarray
-                Array of training data points
-            labels : np.ndarray
-                Array of training labels
-            points_per_epoch : int
-                Number of training points to use in each epoch
-            valid_points : int
-                Number of training points to set aside for validation
-                These points are set aside before training
-            max_epochs : int
-                Maximum number of epochs to train
-            eta : float
-                Learning rate
-            alpha : float
-                Momentum scalar
-            L, H : float
-                Low and high thresholds for training
-            patience : int
-                Amount of epochs with no improvement before early stopping
-            es_delta : float
-                Required improvement for early stopping
-            save_dir : pathlib.Path or str
-                Directory to save best model parameters in
-        '''
+        data : np.ndarray
+            Array of training data points
+        labels : np.ndarray
+            Array of training labels
+        points_per_epoch : int
+            Number of training points to use in each epoch
+        valid_points : int
+            Number of training points to set aside for validation
+            These points are set aside before training
+        max_epochs : int
+            Maximum number of epochs to train
+        eta, alpha : float
+            Learning rate and Momentum scalar
+        L, H : float
+            Low and high thresholds for training
+        patience : int
+            Amount of epochs with no improvement before early stopping
+        es_delta : float
+            Required improvement for early stopping
+        save_dir : pathlib.Path or str
+            Directory to save best model parameters in
+        """
         # Initialize progress bar
         pbar_manager = enlighten.get_manager()
         pbar = pbar_manager.counter(total=max_epochs, desc='Training',

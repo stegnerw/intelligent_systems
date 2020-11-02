@@ -12,19 +12,18 @@ import matplotlib.pyplot as plt
 
 def makeConfMat(classifier, data, labels, plot_name, title):
     '''Generate and save a confusion matrix
-    Parameters:
-    -----------
-        data : np.ndarray
-            Array of data values
-        labels : np.ndarray
-            Array of labels as one-hot-vectors
-        plot_name : pathlib.Path or str
-            File name to save the matrix as
-        title : str
-            Title of the confusion matrix
-    Returns:
-    --------
-        None
+    Parameters
+    ----------
+    classifier : Classifier
+        Classifier for use in classification
+    data : np.ndarray
+        Array of data values
+    labels : np.ndarray
+        Array of labels as one-hot-vectors
+    plot_name : pathlib.Path or str
+        File name to save the matrix as
+    title : str
+        Title of the confusion matrix
     '''
     assert len(data) == len(labels), \
             'Size mismatch between data and labels'
@@ -53,7 +52,6 @@ def makeConfMat(classifier, data, labels, plot_name, title):
 
 # Seed for consistency
 np.random.seed(SEED)
-# File locations
 # Load best weights back up and make confusion matrices
 classifier = Classifier(input_size=INPUTS)
 weight_files = sorted(CLASS_MODEL_DIR.iterdir())

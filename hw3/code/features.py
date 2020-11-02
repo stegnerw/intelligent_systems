@@ -13,14 +13,14 @@ import matplotlib.pyplot as plt
 
 
 def drawFeatures(weights, dir_name):
-    '''Draw the output predictions and save them
-    Parameters:
-    -----------
-        weights : np.ndarray
-            Array of weights for the neurons
-        dir_name : str
-            Name of the directory to save the images to
-    '''
+    """Draw the output predictions and save them
+    Parameters
+    ----------
+    weights : np.ndarray
+        Array of weights for the neurons
+    dir_name : str
+        Name of the directory to save the images to
+    """
     for i, w in enumerate(weights):
         # Remove bias and normalize on [0, 1]
         w = w[1:]

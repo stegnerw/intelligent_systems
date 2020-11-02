@@ -11,23 +11,21 @@ class Layer:
             num_neurons = None,
             inputs = None,
         ):
-        '''Initialize Layer object either randomly or by a weight file
-        Parameters:
-        -----------
-            weight_file : str, optional
-                File to load pre-existing weights from
-            num_neurons, inputs : int, optional
-                Number of hidden neurons and inputs to the layer
-        Returns:
-        --------
-            Layer
-                The Layer object which was constructed
-        '''
+        """Initialize Layer object either randomly or by a weight file
+        Parameters
+        ----------
+        weight_file : str, optional
+            File to load pre-existing weights from
+        num_neurons, inputs : int, optional
+            Number of hidden neurons and inputs to the layer
+        """
         if weight_file:
+            # Load saved weights
             self.loadWeights(weight_file)
             self.num_neurons = self.w.shape[0]
             self.inputs = self.w.shape[1] - 1
         else:
+            # Randomly initialize weights
             self.num_neurons = num_neurons
             self.inputs = inputs
             self.initW()
@@ -39,30 +37,24 @@ class Layer:
         self.w_change = np.zeros(self.w.shape) # Weight changes
 
     def initW(self):
-        '''Initialize weights for the perceptron using Xavier initialization
-        Parameters:
-        -----------
-            None
-        Returns:
-        --------
-            None
-        '''
+        """Initialize weights for the perceptron using Xavier initialization
+        """
         w_shape = (self.num_neurons, self.inputs + 1)
         a = np.sqrt(6 / (self.inputs + self.num_neurons))
         self.w = np.random.uniform(-a, a, size=w_shape)
         self.w_change = np.zeros(self.w.shape)
 
     def forwardPass(self, x):
-        '''Pass the input forward through the layer
-        Parameters:
-        -----------
-            x : np.ndarray of np.float64
-                Input to the layer
-        Returns:
-        --------
-            np.array of np.float64
-                Output of the layer
-        '''
+        """Pass the input forward through the layer
+        Parameters
+        ----------
+        x : np.ndarray of np.float64
+            Input to the layer
+        Returns
+        -------
+        np.array of np.float64
+            Output of the layer
+        """
         # Add bias input
         x = np.concatenate(([1], x))
         # Save inputs for back-prop
@@ -74,24 +66,21 @@ class Layer:
         return self.y
 
     def setDelta(self):
-        '''Calculate delta value, different for Output and Hidden layer
+        """Calculate delta value, different for Output and Hidden layer
         Must be implemented per-class
-        '''
+        """
         raise NotImplementedError('Cannot call from Layer class')
 
-    def getWChange(self, eta=1, alpha=0.1):
-        '''Calculate weight updates for the most recent forward pass
+    def getWChange(self, eta, alpha):
+        """Calculate weight updates for the most recent forward pass
         Requires delta to be calculated (varies between hidden/output layers)
-        Parameters:
-        -----------
-            eta : float
-                Learning rate for weight adjustments
-            alpha : float
-                Momentum scalar
-        Returns:
-        --------
-            None
-        '''
+        Parameters
+        ----------
+        eta : float
+            Learning rate for weight adjustments
+        alpha : float
+            Momentum scalar
+        """
         # Set delta value
         self.setDelta()
         # Pre-scale weight change for momentum
@@ -103,38 +92,26 @@ class Layer:
         self.w_change += new_change
 
     def changeW(self):
-        '''Apply w_change to the weights
-        Parameters:
-        -----------
-            None
-        Returns:
-        --------
-            None
-        '''
+        """Apply w_change to the weights
+        """
         self.w += self.w_change
 
     def saveWeights(self, weight_file):
-        '''Save weights to a file
-        Parameters:
-        -----------
-            weight_file : str
-                File name to save weights in
-        Returns:
-        --------
-            None
-        '''
+        """Save weights to a file
+        Parameters
+        ----------
+        weight_file : str
+            File name to save weights in
+        """
         np.save(str(weight_file), self.w)
 
     def loadWeights(self, weight_file):
-        '''Save weights to a file
-        Parameters:
-        -----------
-            weight_file : str
-                File name to save weights in
-        Returns:
-        --------
-            None
-        '''
+        """Save weights to a file
+        Parameters
+        ----------
+        weight_file : str
+            File name to save weights in
+        """
         self.w = np.load(str(weight_file))
 
 

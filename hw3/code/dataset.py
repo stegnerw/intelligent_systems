@@ -3,20 +3,15 @@
 ###############################################################################
 from settings import *
 import numpy as np
-import pathlib
-import matplotlib.pyplot as plt
 
 
 def shufflePair(data, labels):
-    '''Shuffle a pair of data and labels in place
-    Parameters:
-    -----------
-        data, labels : np.ndarray
-            Data and labels to be shuffled
-    Returns:
-    --------
-        None
-    '''
+    """Shuffle a pair of data and labels in place
+    Parameters
+    ----------
+    data, labels : np.ndarray
+        Data and labels to be shuffled
+    """
     assert len(data) == len(labels), \
             'Size mismatch between data and labels'
     indeces = np.random.permutation(len(data))
@@ -25,17 +20,8 @@ def shufflePair(data, labels):
 
 
 if __name__ == '__main__':
-    # # Define important values from settings
-    # SEED = 69420
-    # CODE_DIR = pathlib.Path(__file__).parent.absolute()
-    # DATA_FILE = CODE_DIR.joinpath('data.txt')
-    # LABEL_FILE = CODE_DIR.joinpath('labels.txt')
-    # DATASET_DIR = CODE_DIR.joinpath('dataset')
-    # DATASET_DIR.mkdir(mode=0o755, exist_ok=True)
-    # TRAIN_DATA_FILE = DATASET_DIR.joinpath('train_data.npy')
-    # TRAIN_LABELS_FILE = DATASET_DIR.joinpath('train_labels.npy')
-    # TEST_DATA_FILE = DATASET_DIR.joinpath('test_data.npy')
-    # TEST_LABELS_FILE = DATASET_DIR.joinpath('test_labels.npy')
+    # Additional imports
+    import pathlib
     # Seed for consistency
     np.random.seed(SEED)
     ###########################################################################
@@ -53,7 +39,7 @@ if __name__ == '__main__':
     with open(LABEL_FILE) as label_f:
         labels = label_f.readlines()
     labels = [int(l) for l in labels]
-    # Make images and sort into bins based on class
+    # Sort into bins based on class
     data_points = dict()
     classes = list()
     for d, l in zip(data, labels):
@@ -65,6 +51,7 @@ if __name__ == '__main__':
     # Turn data lists into numpy arrays
     for l in classes:
         data_points[l] = np.array(data_points[l], dtype=np.float64)
+
     ###########################################################################
     # Partition dataset
     ###########################################################################
@@ -97,6 +84,7 @@ if __name__ == '__main__':
     # Shuffle arrays
     shufflePair(train_data, train_labels)
     shufflePair(test_data, test_labels)
+
     ###########################################################################
     # Save arrays
     ###########################################################################

@@ -8,18 +8,18 @@ import matplotlib.pyplot as plt
 
 class Autoencoder(MLP):
     def eval(self, data, labels):
-        '''Evaluate error on a data set
-        Parameters:
-        -----------
-            data : np.ndarray
-                Array of data points
-            labels : np.ndarray
-                Array of labels for the data
-        Returns:
-        --------
-            float
-                Error (1 - Hit Rate)
-        '''
+        """Evaluate error on a data set
+        Parameters
+        ----------
+        data : np.ndarray
+            Array of data points
+        labels : np.ndarray
+            Array of labels for the data
+        Returns
+        -------
+        float
+            Error (1 - Hit Rate)
+        """
         # Calculate loss
         total_loss = 0
         for d, l in zip(data, labels):
