@@ -16,7 +16,7 @@ class HiddenLayer(Layer):
         delta : np.ndarray
             Matrix of delta values for the next layer
         """
-        self.downstream_sum = np.matmul(w[:,:-1].transpose(), delta)
+        self.downstream_sum = np.matmul(w[:,1:].transpose(), delta)
 
     def setDelta(self):
         """Calculate delta for the hidden layer
