@@ -26,7 +26,8 @@ class MLP:
         self.layers = list()
         self.input_size = input_size
 
-    def addLayer(self, file_name=None, neurons=None, output=False):
+    def addLayer(self, file_name=None, neurons=None, output=False,
+            trainable=False):
         """Add a layer to the network
         """
         if len(self.layers) == 0:
@@ -35,16 +36,18 @@ class MLP:
             input_size = self.layers[-1].num_neurons
         if file_name:
             if output:
-                self.layers.append(OutputLayer(weight_file=file_name))
+                self.layers.append(OutputLayer(weight_file=file_name,
+                    trainable=trainable))
             else:
-                self.layers.append(HiddenLayer(weight_file=file_name))
+                self.layers.append(HiddenLayer(weight_file=file_name,
+                    trainable=trainable))
         else:
             if output:
                 self.layers.append(OutputLayer(num_neurons=neurons,
-                    inputs=input_size))
+                    inputs=input_size, trainable=trainable))
             else:
                 self.layers.append(HiddenLayer(num_neurons=neurons,
-                    inputs=input_size))
+                    inputs=input_size, trainable=trainable))
 
     def predict(self, data, one_hot):
         """Predict the output given an input
@@ -92,6 +95,9 @@ class MLP:
         self.layers[-1].getWChange(eta, alpha)
         # Back-prop error
         for i in range(len(self.layers)-2, -1, -1):
+            # Stop the back-prop if we hit an untrainable layer
+            if self.layers[i].trainable == False:
+                break
             down_w = self.layers[i+1].w
             down_delta = self.layers[i+1].delta
             self.layers[i].setDownstreamSum(down_w, down_delta)

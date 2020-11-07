@@ -3,7 +3,6 @@
 ###############################################################################
 # Custom imports
 from settings import *
-from classifier import Classifier
 from autoencoder import Autoencoder
 # External imports
 import numpy as np
@@ -34,17 +33,17 @@ def drawFeatures(weights, dir_name):
 # Seed for consistency
 np.random.seed(SEED)
 # Load best weights back up for each model
-autoencoder = Autoencoder(input_size=INPUTS)
-for weight_file in sorted(AUTO_MODEL_DIR.iterdir()):
-    autoencoder.addLayer(file_name=weight_file)
-classifier = Classifier(input_size=INPUTS)
-for weight_file in sorted(CLASS_MODEL_DIR.iterdir()):
-    classifier.addLayer(file_name=weight_file)
+auto_clean = Autoencoder(input_size=INPUTS)
+for weight_file in sorted(AUTO_CLEAN_MODEL_DIR.iterdir()):
+    auto_clean.addLayer(file_name=weight_file)
+auto_noisy = Autoencoder(input_size=INPUTS)
+for weight_file in sorted(AUTO_NOISY_MODEL_DIR.iterdir()):
+    auto_noisy.addLayer(file_name=weight_file)
 # Neurons to check
-neuron_count = classifier.layers[0].num_neurons
+neuron_count = auto_clean.layers[0].num_neurons
 neurons = np.random.choice(np.arange(neuron_count), 20, replace=False)
-class_weights = classifier.layers[0].w[neurons]
-drawFeatures(class_weights, CLASS_FEAT_DIR)
-auto_weights = autoencoder.layers[0].w[neurons]
-drawFeatures(auto_weights, AUTO_FEAT_DIR)
+clean_weights = auto_clean.layers[0].w[neurons]
+drawFeatures(clean_weights, AUTO_CLEAN_IMG_DIR)
+noisy_weights = auto_noisy.layers[0].w[neurons]
+drawFeatures(noisy_weights, AUTO_NOISY_IMG_DIR)
 

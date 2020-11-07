@@ -10,6 +10,7 @@ class Layer:
             weight_file = None,
             num_neurons = None,
             inputs = None,
+            trainable = True,
         ):
         """Initialize Layer object either randomly or by a weight file
         Parameters
@@ -19,6 +20,7 @@ class Layer:
         num_neurons, inputs : int, optional
             Number of hidden neurons and inputs to the layer
         """
+        self.trainable = trainable
         if weight_file:
             # Load saved weights
             self.loadWeights(weight_file)

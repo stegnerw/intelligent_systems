@@ -38,7 +38,7 @@ if __name__ == '__main__':
     # Seed for consistency
     np.random.seed(SEED)
     # Delete old model
-    for f in AUTO_MODEL_DIR.iterdir():
+    for f in AUTO_CLEAN_MODEL_DIR.iterdir():
         f.unlink()
     # Training constants
     # Test network
@@ -51,16 +51,16 @@ if __name__ == '__main__':
     autoencoder.train(
         train_data,
         train_data,
-        points_per_epoch=AUTO_POINTS_PER_EPOCH,
-        valid_points=AUTO_VALID_POINTS,
-        max_epochs=AUTO_MAX_EPOCHS,
-        eta=AUTO_ETA,
-        alpha=AUTO_ALPHA,
-        L=AUTO_L,
-        H=AUTO_H,
-        patience=AUTO_PATIENCE,
-        es_delta=AUTO_ES_DELTA,
-        save_dir=AUTO_MODEL_DIR,
+        points_per_epoch=AUTO_CLEAN_POINTS_PER_EPOCH,
+        valid_points=AUTO_CLEAN_VALID_POINTS,
+        max_epochs=AUTO_CLEAN_MAX_EPOCHS,
+        eta=AUTO_CLEAN_ETA,
+        alpha=AUTO_CLEAN_ALPHA,
+        L=AUTO_CLEAN_L,
+        H=AUTO_CLEAN_H,
+        patience=AUTO_CLEAN_PATIENCE,
+        es_delta=AUTO_CLEAN_ES_DELTA,
+        save_dir=AUTO_CLEAN_MODEL_DIR,
     )
     plt.figure()
     plt.plot(autoencoder.epoch_num, autoencoder.train_err)
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     plt.xlim([0, autoencoder.epoch_num[-1]])
     plt.ylabel('Loss')
     plt.ylim([0, max(max(autoencoder.train_err), max(autoencoder.valid_err))])
-    plt.savefig(str(AUTO_LOSS_PLOT), bbox_inches='tight', pad_inches=0)
+    plt.savefig(str(AUTO_CLEAN_LOSS_PLOT), bbox_inches='tight', pad_inches=0)
     plt.close()
     # Save parameters to CSV
     print('Saving training parameters')
@@ -80,20 +80,20 @@ if __name__ == '__main__':
     csv_rows.append(['Parameter', 'Value', 'Description'])
     csv_rows.append(['$hidden\\_layer\\_size$', str(HIDDEN_LAYER_SIZES[0]),
         'Neurons in hidden layer'])
-    csv_rows.append(['$\\eta$', str(AUTO_ETA), 'Learning rate'])
-    csv_rows.append(['$\\alpha$', str(AUTO_ALPHA), 'Momentum'])
-    csv_rows.append(['$max\\_epochs$', str(AUTO_MAX_EPOCHS),
+    csv_rows.append(['$\\eta$', str(AUTO_CLEAN_ETA), 'Learning rate'])
+    csv_rows.append(['$\\alpha$', str(AUTO_CLEAN_ALPHA), 'Momentum'])
+    csv_rows.append(['$max\\_epochs$', str(AUTO_CLEAN_MAX_EPOCHS),
         'Maximum training epochs'])
-    csv_rows.append(['$L$', str(AUTO_L), 'Lower activation threshold'])
-    csv_rows.append(['$H$', str(AUTO_H), 'Upper activation threshold'])
-    csv_rows.append(['$patience$', str(AUTO_PATIENCE),
+    csv_rows.append(['$L$', str(AUTO_CLEAN_L), 'Lower activation threshold'])
+    csv_rows.append(['$H$', str(AUTO_CLEAN_H), 'Upper activation threshold'])
+    csv_rows.append(['$patience$', str(AUTO_CLEAN_PATIENCE),
         'Patience before early stopping'])
-    csv_rows.append(['$es\\_delta$', str(AUTO_ES_DELTA),
+    csv_rows.append(['$es\\_delta$', str(AUTO_CLEAN_ES_DELTA),
         'Delta value for early stopping'])
-    with open(str(AUTO_PARAM_CSV), 'w') as csv_file:
+    with open(str(AUTO_CLEAN_PARAM_CSV), 'w') as csv_file:
         csv_writer = csv.writer(csv_file)
         csv_writer.writerows(csv_rows)
     # Write best epoch
-    with open(str(AUTO_BEST_EPOCH), 'w') as best_epoch_file:
+    with open(str(AUTO_CLEAN_BEST_EPOCH), 'w') as best_epoch_file:
         best_epoch_file.write(str(autoencoder.best_weights_epoch))
 

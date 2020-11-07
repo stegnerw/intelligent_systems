@@ -94,7 +94,7 @@ def drawSamples(autoencoder, data, num_samples, dir_name, title):
 np.random.seed(SEED)
 # Load best weights back up
 autoencoder = Autoencoder(input_size=INPUTS)
-weight_files = sorted(AUTO_MODEL_DIR.iterdir())
+weight_files = sorted(AUTO_CLEAN_MODEL_DIR.iterdir())
 for weight_file in weight_files[:-1]:
     autoencoder.addLayer(file_name=weight_file, output=False)
 autoencoder.addLayer(file_name=weight_files[-1], output=True)
@@ -102,7 +102,7 @@ autoencoder.addLayer(file_name=weight_files[-1], output=True)
 test_err = autoencoder.eval(test_data, test_data)
 print(f'Test loss: {test_err:0.3f}')
 sample_title = 'Autoencoder Sample Outputs'
-drawSamples(autoencoder, test_data, 8, AUTO_SAMPLE_DIR, sample_title)
+drawSamples(autoencoder, test_data, 8, AUTO_CLEAN_IMG_DIR, sample_title)
 # Graph loss by class
 print('Testing train set')
 train_loss = getLossByClass(autoencoder, train_data, train_labels)
@@ -121,7 +121,7 @@ plt.grid(axis='y')
 plt.gca().set_axisbelow(True)
 plt.legend(loc='lower right')
 plt.tight_layout()
-plt.savefig(str(AUTO_BAR), bbox_inches='tight', pad_inches=0)
-with open(str(AUTO_TEST_LOSS), 'w') as loss_f:
+plt.savefig(str(AUTO_CLEAN_BAR), bbox_inches='tight', pad_inches=0)
+with open(str(AUTO_CLEAN_TEST_LOSS), 'w') as loss_f:
     loss_f.write(f'{test_err:0.3f}')
 
