@@ -27,7 +27,7 @@ class MLP:
         self.input_size = input_size
 
     def addLayer(self, file_name=None, neurons=None, output=False,
-            trainable=False):
+            trainable=True):
         """Add a layer to the network
         """
         if len(self.layers) == 0:

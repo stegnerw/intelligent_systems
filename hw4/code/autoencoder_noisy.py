@@ -19,8 +19,8 @@ if __name__ == '__main__':
     # Test network
     autoencoder = Autoencoder(input_size=INPUTS)
     for h in HIDDEN_LAYER_SIZES:
-        autoencoder.addLayer(neurons=h, output=False)
-    autoencoder.addLayer(neurons=INPUTS, output=True)
+        autoencoder.addLayer(neurons=h, output=False, trainable=True)
+    autoencoder.addLayer(neurons=INPUTS, output=True, trainable=True)
     # Train the network
     print('* * * Begin training autoencoder * * *')
     autoencoder.train(
