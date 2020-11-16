@@ -106,8 +106,11 @@ drawSamples(autoencoder, test_data, 8, AUTO_CLEAN_IMG_DIR, sample_title)
 # Graph loss by class
 print('Testing train set')
 train_loss = getLossByClass(autoencoder, train_data, train_labels)
+train_loss = [autoencoder.eval(train_data, train_data)] + train_loss
 print('Testing test set')
 test_loss = getLossByClass(autoencoder, test_data, test_labels)
+test_loss = [autoencoder.eval(test_data, test_data)] + test_loss
+labels = ['Overall'] + list(range(len(train_loss) - 1))
 x = np.arange(len(train_loss))
 plt.figure()
 rect_width = 0.35
@@ -115,7 +118,7 @@ plt.bar(x-rect_width/2, train_loss, rect_width, label='Train')
 plt.bar(x+rect_width/2, test_loss, rect_width, label='Test')
 plt.title('Autoencoder Loss by Class')
 plt.xlabel('Class')
-plt.xticks(x)
+plt.xticks(x, labels=labels)
 plt.ylabel('Loss')
 plt.grid(axis='y')
 plt.gca().set_axisbelow(True)

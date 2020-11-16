@@ -1,0 +1,10 @@
+Parameter,Clean,Noisy,Description
+$hidden\_layer\_size$,128,128,Neurons in hidden layer
+$\eta$,0.01,0.01,Learning rate
+$\alpha$,0.8,0.8,Momentum
+$\lambda$,0.0,0.0,Weight decay
+$max\_epochs$,500,500,Maximum training epochs
+$L$,0.25,0.25,Lower activation threshold
+$H$,0.75,0.75,Upper activation threshold
+$patience$,5,5,Patience before early stopping
+$es\_delta$,0.0,0.0,Delta value for early stopping

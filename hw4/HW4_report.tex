@@ -57,10 +57,6 @@
 \newcommand{\figRef}[1]{Figure \ref{#1}}
 \newcommand{\tabRef}[1]{Table \ref{#1}}
 \newcommand{\eqRef}[1]{(\ref{#1})}
-% Reading data from files
-%\newcommand{\knnData}[1]{\DTLfetch{knndata}{key}{#1}{value}}
-%\newcommand{\neighborhoodData}[1]{\DTLfetch{neighborhooddata}{key}{#1}{value}}
-%\newcommand{\perceptronData}[1]{\DTLfetch{perceptrondata}{key}{#1}{value}}
 % Values
 \newcommand{\digitwidth}{0.08\textwidth}
 \newcommand{\doubledigitwidth}{0.15\textwidth}
@@ -73,14 +69,195 @@
   \maketitle
   \section{Problem 1}
   \subsection{Problem Summary}
-  \par The goal of this problem is to create a multi-layer feed-forward neural
-  network for classification of the MNIST dataset.
-  The network was trained using gradient descent with back-propagation with
-  momentum, and is trainable for arbitrary amounts and sizes of hidden layers.
-  During training, the loss is calculated using $J_{2}$ loss with threshold
-  values.
-  For performance measurement, the loss is calculated as $1 - hit\_rate$ using
-  winner-take-all on the output layer to define the predicted class.
+  \par The goal of this problem is to create a denoising autoencoder using
+  multi-layer feed forward neural networks.
+  The network structure is identical to that in Homework 3 Problem 2 with the
+  exception that the input data has noise applied to it, and it is expected to
+  reconstruct the image without the noise.
+  The noise model used in this problem is a salt-and-pepper noise model, where
+  each input pixel has a probability of 0.4 to turn black and a probability of
+  0.05 to turn white.
+  The pepper probability is higher to compensate for the fact that most of the
+  images are black already.
+
+  \subsection{Results}
+  \subsubsection{System Description}
+  \par \tabRef{tab:auto_param} shows the hyper-parameters used in training
+  the autoencoder (both clean and denoising).
+  I retrained my clean autoencoder because I added weight decay and wanted to
+  properly compare the networks.
+  These hyper-parameters were found empirically.
+  \begin{table}[htb]
+    \centering
+    \vspace{-12pt}
+    \caption{Autoencoder Training Hyper-Parameters}
+    \vspace{-12pt}
+    \csvautotabular{data/auto_params.csv}
+    \label{tab:auto_param}
+    \vspace{-12pt}
+  \end{table}
+  \par Weight initialization is done randomly on a uniform distribution between
+  $(-a, +a)$ where $a = \sqrt(\frac{6}{N_{source} + N_{target}})$, and
+  $N_{source}$ and $N_{target}$ are the numbers of neurons on the source and
+  target layers respectively.
+  \par My learning algorithm includes weight decay.
+  To calculate weight updates, this adds the term $-\lambda * \eta * w$.
+  The goal of adding weight decay is to improve generalizability, especially
+  because the features of the autoencoder will be used to make a classifier in
+  the next problem.
+  \par The network utilizes early stopping by monitoring a validation set,
+  which consists of 1000 training points that are set aside before training.
+  This leaves 3000 data points for training the weights of the networks.
+  If the validation loss does not improve for $patience$ steps (1 step = 10
+  epochs), training halts.
+  The validation is considered improved if the validation is $es\_delta$ lower
+  than the previous improved validation loss.
+  The weights used by the final network are the weights from the epoch with the
+  lowest validation loss.
+
+  \subsubsection{Network Results}
+  \par Throughout the duration of training, the loss of the training and
+  validation sets was tracked every 10 epochs.
+  The loss was calculated using $J2$ loss.
+  \figRef{fig:auto_clean_loss} and \figRef{fig:auto_noisy_loss} show training
+  and validation loss for the clean and denoising autoencoders respectively.
+  The vertical lines designates the point where the validation error is
+  minimized.
+  The clean autoencoder achieves a minimal test loss of
+  \input{data/auto_clean/test_loss.dat}\unskip{} at epoch
+  \input{data/auto_clean/best_epoch.dat}\unskip{}.
+  The denoising autoencoder achieves a minimal test loss of
+  \input{data/auto_noisy/test_loss.dat}\unskip{} at epoch
+  \input{data/auto_noisy/best_epoch.dat}\unskip{}.
+  \begin{figure}[htb]
+    \vspace{-12pt}
+    \begin{minipage}{0.45\textwidth}
+      \centering
+      \includegraphics[width=0.95\textwidth]{images/auto_clean/loss_graph.png}
+      \caption{Training and validation loss of the clean autoencoder.}
+      \label{fig:auto_clean_loss}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+      \centering
+      \includegraphics[width=0.95\textwidth]{images/auto_noisy/loss_graph.png}
+      \caption{Training and validation loss of the denoising autoencoder.}
+      \label{fig:auto_noisy_loss}
+    \end{minipage}
+    \vspace{-12pt}
+  \end{figure}
+  \par After training, the loss in each class was measured for each
+  autoencoder.
+  \figRef{fig:bar_clean} and \figRef{fig:bar_noisy} show the final loss of each
+  class (and overall) for the clean and denoising autoencoders respectively.
+  \begin{figure}
+    \begin{minipage}{0.45\textwidth}
+      \centering
+      \includegraphics[width=0.95\textwidth]{images/auto_clean/loss_bar_plot.png}
+      \caption{Loss of the clean autoencoder.}
+      \label{fig:bar_clean}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+      \centering
+      \includegraphics[width=0.95\textwidth]{images/auto_noisy/loss_bar_plot.png}
+      \caption{Loss of the denoising autoencoder.}
+      \label{fig:bar_noisy}
+    \end{minipage}
+  \end{figure}
+
+  \subsubsection{Features}
+  \par After training, the features learned by 20 arbitrary neurons in the
+  hidden layer of both the classifier and autoencoder were observed by
+  normalizing the weights from 0 to 1 and then displaying them like an image.
+  The images are mapped so 1 is white and 0 is black.
+  \figRef{fig:clean_feat} shows the features of the clean autoencoder, and
+  \figRef{fig:noisy_feat} shows the features of the noisy autoencoder.
+
+  \subsubsection{Sample Outputs}
+  \par After training, the outputs of eight random data points from the test
+  set were tested in both the clean and denoising autoencoders.
+  \figRef{fig:samples_clean} shows the original and reconstructed clean images,
+  and \figRef{fig:samples_noisy} shows the original and denoised images.
+
+  \subsection{Discussion and Analysis of Results}
+  \par Overall, the results look pretty good.
+  The denoising autoencoder does not reconstruct the images as well as the
+  clean autoencoder, but this is expected because denoising is a more difficult
+  task than simple reconstruction.
+  To compensate for the increased difficulty, the denoising autoencoder was
+  trained with a lower $\eta$ value and a higher $\lambda$ value.
+  The higher $\lambda$ is evident because the loss values of the train and test
+  sets are closer together for the denoising autoencoder than for the clean
+  autoencoder.
+  \par In \figRef{fig:bar_clean} and \figRef{fig:bar_noisy}, the loss for both
+  the clean and denoising autoencoders are the lowest for reconstructing 1s.
+  This makes sense because a 1 is simply a straight line, so it should be quite
+  simple to recognize and reconstruct.
+  None of the loss values stand out as particularly high, at least not as much
+  as the 1s stand out for being low.
+  \par The clean features in \figRef{fig:clean_feat} are just a bunch of dots,
+  while the denoising features in \figRef{fig:noisy_feat} contain more lines
+  and curves.
+  The denoising features bear more resemblance to actual numbers than the clean
+  features.
+  Because of the weight decay, the borders of the clean features are uniform
+  color because of the absence of input in those regions, while the borders
+  of the denoising features appear as TV static because they were stimulated
+  by the noise.
+
+  \subsection{Conclusion}
+  \par The denoising autoencoder is able to effectively remove salt-and-pepper
+  noise and reconstruct digits from the MNIST dataset.
+  While the performance is not as good as the clean autoencoder it is able to
+  clean out the salt-and-pepper noise very well, which is a much more difficult
+  task than simply reconstructing the digits.
+  Further testing in optimizing the hyper-parameters of the network can help to
+  improve the reconstruction accuracy even further.
+
+  % Figures Page
+  \begin{figure}[p]
+    \begin{minipage}{0.45\textwidth}
+      \centering
+      \input{./auto_clean_feat.tex}
+      \caption{Clean features.}
+      \label{fig:clean_feat}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+      \centering
+      \input{./auto_noisy_feat.tex}
+      \caption{Denoising features.}
+      \label{fig:noisy_feat}
+    \end{minipage}
+  \end{figure}
+  \begin{figure}[p]
+    \centering
+    \input{./samples_clean.tex}
+    \caption{Original (top) and reconstructed (bottom) data points.}
+    \label{fig:samples_clean}
+  \end{figure}
+  \begin{figure}[p]
+    \centering
+    \input{./samples_noisy.tex}
+    \caption{Original (top) and denoised (bottom) data points.}
+    \label{fig:samples_noisy}
+  \end{figure}
+
+  \pagebreak
+  \section{Problem 2}
+  \subsection{Problem Summary}
+  \par The goal of this problem is to create a classifier using the features
+  learned from the clean and denoising autoencoders trained in Problem 1.
+  This is done by taking the weights of the hidden layers of the autoencoders
+  and then randomly initializing weights for a classification layer for the
+  output.
+  During training, only the output weights are updated, so the network will
+  not change the features learned by the hidden layer.
+  \par For the purposes of this report, the ``clean classifier'' refers to the
+  classifier using the weights of the autoencoder with no noise applied, and
+  the ``noisy classifier'' refers to the classifier using weights from the
+  denoising autoencoder.
 
   \subsection{Results}
   \subsubsection{System Description}
@@ -95,208 +272,111 @@
     \vspace{-12pt}
     \caption{Classifier Training Hyper-Parameters}
     \vspace{-12pt}
-    \csvautotabular{data/class_parameters.csv}
+    \csvautotabular{data/class_params.csv}
     \label{tab:class_param}
     \vspace{-12pt}
   \end{table}
-  \par Weight initialization is done randomly on a uniform distribution between
-  $(-a, +a)$ where $a = \sqrt(\frac{6}{N_{source} + N_{target}})$, and
-  $N_{source}$ and $N_{target}$ are the numbers of neurons on the source and
-  target layers respectively.
-  \par The network utilizes early stopping by monitoring a validation set,
-  which consists of 1000 training points that are set aside before training.
-  If the validation loss does not improve for $patience$ steps (1 step = 10
-  epochs), training halts.
-  The validation is considered improved if the validation is $es\_delta$ lower
-  than the previous improved validation loss.
-  The weights used by the final network are the weights from the epoch with the
-  lowest validation loss.
-  To improve the frequency of checking for early stopping, the network only
-  uses 1000 training points per epoch.
-
-  \subsubsection{Network Results}
-  \par Throughout the duration of training, the loss of the training and
-  validation sets was tracked every 10 epochs.
-  \figRef{fig:class_loss} shows a plot of the loss values while training the
-  classifier.
-  The vertical line designates the point where the validation error is
-  minimized, which occurs at epoch
-  \input{data/class_best_epoch.dat}\unskip{}.
-  The weights at that epoch are the weights used in the final network, where
-  the test loss is \input{data/class_test_loss.dat}\unskip{}.
-  \begin{figure}[htb]
-    \centering
-    \includegraphics[width=0.5\textwidth]{images/class_loss.png}
-    \caption{Training and validation loss of the classifier.}
-    \label{fig:class_loss}
-  \end{figure}
-  \par \figRef{fig:conf} shows the confusion matrices for the train and
-  test sets using the weights from the best epoch.
-  \begin{figure}[htb]
-    \centering
-    \subfloat[][]{
-      \includegraphics[width=0.48\textwidth]{images/train_conf_mat.png}
-      \label{fig:conf_train}
-    }
-    \subfloat[][]{
-      \includegraphics[width=0.48\textwidth]{images/test_conf_mat.png}
-      \label{fig:conf_test}
-    }
-    \caption{Confusion matrices of the train and test sets.}
-    \label{fig:conf}
-  \end{figure}
-
-  \subsection{Discussion and Analysis of Results}
-  \par Overall, the results look pretty good.
-  The best weights happen pretty early at epoch
-  \input{data/class_best_epoch.dat}\unskip{} and get a fairly low loss of
-  \input{data/class_test_loss.dat}\unskip{}.
-  While testing hyper-parameters, it was observed that when $es\_delta$ is set
-  to 0 and $patience$ is increased to around 5, the test loss would sometimes
-  get as low as 0.05, but that generally occurred after several hundred epochs
-  and is also dependent on weight initialization numbers and dataset shuffling
+  \par This network uses the same weight initialization, early stopping, and
+  weight decay as described in Problem 1.
+  The difference here is that the values on the output layer are thresholded
   during training.
-  With the early stopping hyper-parameters used by this model, it sacrifices
-  some performance, but it trains significantly faster, making these
-  hyper-parameters ideal for implementing and troubleshooting the network from
-  scratch.
-  \par The diagonal of the confusion matrices in \figRef{fig:conf} is very
-  dark, with hardly any coloring in the incorrect boxes.
-  Many of the incorrect classifications are in two classes which look similar.
-  For example, \figRef{fig:conf_train} shows four 9s classified as 4s and five
-  4s classified as 9s.
-  This mix-up makes a lot of sense, because the shapes of 4s and 9s tend to be
-  similar, especially with some of the sloppy handwriting in MNIST.
-
-  \subsection{Conclusion}
-  \par This multi-layer feed-forward neural network classifier is able to
-  effectively classify the MNIST dataset given in this problem.
-  While the results are certainly not state-of-the-art, the trained network
-  classifies over 90\% of the test set digits correctly.
-  Further testing in optimizing the hyper-parameters of the network can help to
-  improve the accuracy even further.
-
-  \pagebreak
-  \section{Problem 2}
-  \subsection{Problem Summary}
-  \par The goal of this problem is to create a multi-layer feed-forward neural
-  network similar to Problem 1, except in this case it will be trained to be an
-  autoencoder.
-  This network has the same features as the network in Problem 1, except the
-  performance measurement is calculated using $J_{2}$ loss instead of
-  $1 - hit\_rate$.
-  Additionally, winner-take-all is not used in the output layer, because it
-  does not make sense in the context of an autoencoder.
-
-  \subsection{Results}
-  \subsubsection{System Description}
-  \par \tabRef{tab:auto_param} shows the hyper-parameters used in training
-  the autoencoder.
-  As with the classifier, these hyper-parameters were found empirically with
-  the same consideration for minimizing final loss and training time.
-  \begin{table}[htb]
-    \centering
-    \caption{Autoencoder Training Hyper-Parameters}
-    \vspace{-12pt}
-    \csvautotabular{data/auto_parameters.csv}
-    \label{tab:auto_param}
-    \vspace{-12pt}
-  \end{table}
-  \par The weight initialization process is the same as in Problem 1, as are
-  the processes for allocating the validation set and applying early stopping.
+  If the neuron fires above $H$ and its target is 1, the error is considered 0
+  for training.
+  If the neuron fires below $L$ and its target is 0, the error is also
+  considered 0 for training.
 
   \subsubsection{Network Results}
   \par Throughout the duration of training, the loss of the training and
   validation sets was tracked every 10 epochs.
-  \figRef{fig:auto_loss} shows a plot of the loss values while training the
-  autoencoder.
-  The vertical line designates the point where the validation error is
-  minimized, which occurs at epoch
-  \input{data/auto_best_epoch.dat}\unskip{}.
-  The weights at that epoch are the weights used in the final network, where
-  the test loss is \input{data/auto_test_loss.dat}\unskip{}.
-  \begin{figure}[htb]
-    \centering
-    \includegraphics[width=0.5\textwidth]{images/auto_loss.png}
-    \caption{Training and validation loss of the autoencoder.}
-    \label{fig:auto_loss}
-  \end{figure}
-  \par After training, the loss in each class was measured.
-  \figRef{fig:bar} shows the loss of each class for the train and
-  test sets using the weights from the best epoch.
-  \begin{figure}[htb]
-    \centering
-    \includegraphics[width=0.5\textwidth]{images/loss_bar_plot.png}
-    \caption{Loss of each class of the train and test sets.}
-    \label{fig:bar}
-  \end{figure}
-
-  \subsubsection{Features}
-  \par After training, the features learned by 20 arbitrary neurons in the
-  hidden layer of both the classifier and autoencoder were observed by
-  normalizing the weights from 0 to 1 and then displaying them like an image.
-  The images are mapped so 1 is white and 0 is black.
-  \figRef{fig:class_feat} shows the features of the classifier, and
-  \figRef{fig:auto_feat} shows the features of the autoencoder.
+  The loss was calculated using $1 - balanced\_accuracy$ with a winner-take-all
+  approach on the output layer.
+  \figRef{fig:class_clean_loss} and \figRef{fig:class_noisy_loss} show plots of
+  the loss values while training the clean and noisy classifiers respectively.
+  The vertical lines designate the point where the validation error is
+  minimized.
+  The clean classifier achieves a minimal test loss of
+  \input{data/class_clean/test_loss.dat}\unskip{} at epoch
+  \input{data/class_clean/best_epoch.dat}\unskip{}.
+  The noisy classifier achieves a minimal test loss of
+  \input{data/class_noisy/test_loss.dat}\unskip{} at epoch
+  \input{data/class_noisy/best_epoch.dat}\unskip{}.
   \begin{figure}[htb]
     \begin{minipage}{0.45\textwidth}
       \centering
-      \input{./class_feat.tex}
-      \caption{Classifier features.}
-      \label{fig:class_feat}
+      \includegraphics[width=0.95\textwidth]{images/class_clean/loss_graph.png}
+      \caption{Training and validation loss of the clean classifier.}
+      \label{fig:class_clean_loss}
     \end{minipage}
     \hfill
     \begin{minipage}{0.45\textwidth}
       \centering
-      \input{./auto_feat.tex}
-      \caption{Autoencoder features.}
-      \label{fig:auto_feat}
+      \includegraphics[width=0.95\textwidth]{images/class_noisy/loss_graph.png}
+      \caption{Training and validation loss of the noisy classifier.}
+      \label{fig:class_noisy_loss}
     \end{minipage}
   \end{figure}
-
-  \subsubsection{Sample Outputs}
-  \par After training, the outputs of eight random data points from the test
-  set were fed reconstructed the autoencoder, meaning the input data point was
-  presented to the network and the output "prediction" was obtained.
-  \figRef{fig:samples} shows the original and reconstructed images.
-  \begin{figure}[htb]
+  \par \figRef{fig:conf_clean} and \figRef{fig:conf_noisy} show the confusion
+  matrices for the train and test sets of the clean and noisy classifier
+  respectively.
+  \begin{figure}[p]
     \centering
-    \input{./samples.tex}
-    \caption{Original (top) and reconstructed (bottom) data points.}
-    \label{fig:samples}
+    \subfloat[][]{
+      \includegraphics[width=0.45\textwidth]
+        {images/class_clean/train_conf_mat.png}
+      \label{fig:conf_clean_train}
+    }
+    \subfloat[][]{
+      \includegraphics[width=0.45\textwidth]
+        {images/class_clean/test_conf_mat.png}
+      \label{fig:conf_clean_test}
+    }
+    \caption{Confusion matrices of the clean classifier.}
+    \label{fig:conf_clean}
+  \end{figure}
+  \begin{figure}[p]
+    \centering
+    \subfloat[][]{
+      \includegraphics[width=0.45\textwidth]
+        {images/class_noisy/train_conf_mat.png}
+      \label{fig:conf_noisy_train}
+    }
+    \subfloat[][]{
+      \includegraphics[width=0.45\textwidth]
+        {images/class_noisy/test_conf_mat.png}
+        \label{fig:conf_noisy_test}
+    }
+    \caption{Confusion matrices of the noisy classifier.}
+    \label{fig:conf_noisy}
   \end{figure}
 
   \subsection{Discussion and Analysis of Results}
-  \par Overall, the results look pretty good.
-  The autoencoder takes longer to train, with its best weights occurring at
-  epoch \input{data/auto_best_epoch.dat}\unskip{} with a loss of
-  \input{data/auto_test_loss.dat}\unskip{}.
-  In \figRef{fig:bar}, the loss for the 1s is particularly salient because it
-  is drastically lower than the other classes loss values.
-  This makes sense because a 1 is simply a straight line, so it should be quite
-  simple to recognize and then reconstruct.
-  While none of the loss values are as noticeably high as 1's loss is low,
-  classes 2, 8, and 5 all have loss values above 2.5.
-  I do not have any intuition as to why those numbers have the highest loss,
-  but those digits are kind of similar in the sense that a 2 is roughly a
-  backward 5, and stacking a 2 on top of a 5 roughly makes an 8.
-  At first, I was surprised that 6 has a higher loss than 9, because 6 is just
-  an upside-down 9, but it makes sense that 5 and 6 have similar features and
-  ended up having similar loss values.
-  \par The features in \figRef{fig:class_feat} and \figRef{fig:auto_feat} are
-  somewhat difficult to interpret.
-  Between the two feature sets, there is a trend where the center of the image
-  appears to have some distinct patterns, while the edge of the image is either
-  somewhat uniform gray or random TV static.
-  In \figRef{fig:class_feat}, the shapes generally seem to be lines or curves,
-  while in \figRef{fig:auto_feat} the features look like a bunch of dark dots
-  with a few brighter spots.
-
+  \par Overall, the results of both classifiers look pretty good.
+  The diagonals of the confusion matrices in \figRef{fig:conf_clean} and
+  \figRef{fig:conf_noisy} are very dark, with hardly any coloring in the
+  incorrect boxes.
+  Many of the incorrect classifications are in two classes which look similar.
+  For example, both networks had many mix-ups between 4s and 9s.
+  In general, it looks like both classifiers were confused about the same
+  classes.
+  The noisy classifier performed better overall than the clean classifier.
+  From an interpretability performance, this makes sense to me because the
+  features learned by the denoising autoencoder in \figRef{fig:noisy_feat} make
+  much more sense than the features learned by the clean autoencoder in
+  \figRef{fig:clean_feat}.
+  \par The classification performance was not as good as the classifier from
+  Homework 3, where a loss of 0.070 was achieved.
+  This is likely because the classifier in Homework 3 is able to fine tune its
+  features to the task of classification, while the features learned for this
+  homework were specifically for image reconstruction.
+  It may be possible to increase the accuracy by using the weights from the
+  autoencoder to initialize the classifier, but allowing them to train.
 
   \subsection{Conclusion}
-  \par This multi-layer feed-forward neural network autoencoder is able to
-  effectively reconstruct digits from the MNIST dataset.
-  Further testing in optimizing the hyper-parameters of the network can help to
-  improve the reconstruction accuracy even further.
+  \par Using the features learned by the autoencoders, the classifiers are able
+  to effectively classify the MNIST dataset.
+  While they do not perform as well as the classifier where all of the layers
+  are trained, they train much more quickly and effectively demonstrate how the
+  autoencoders' features are useful for distinguishing between different
+  digits.
 
 \end{document}

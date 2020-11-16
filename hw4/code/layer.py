@@ -73,7 +73,7 @@ class Layer:
         """
         raise NotImplementedError('Cannot call from Layer class')
 
-    def getWChange(self, eta, alpha):
+    def getWChange(self, eta, alpha, decay):
         """Calculate weight updates for the most recent forward pass
         Requires delta to be calculated (varies between hidden/output layers)
         Parameters
@@ -82,6 +82,8 @@ class Layer:
             Learning rate for weight adjustments
         alpha : float
             Momentum scalar
+        decay : float
+            Weight decay scalar
         """
         # Set delta value
         self.setDelta()
@@ -91,6 +93,7 @@ class Layer:
         d = self.delta.reshape(len(self.delta), 1)
         x = self.x.reshape(1, len(self.x))
         new_change = eta * np.matmul(d, x)
+        new_change -= eta * decay * self.w
         self.w_change += new_change
 
     def changeW(self):

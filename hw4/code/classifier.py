@@ -59,6 +59,7 @@ if __name__ == '__main__':
         max_epochs=CLASS_CLEAN_MAX_EPOCHS,
         eta=CLASS_CLEAN_ETA,
         alpha=CLASS_CLEAN_ALPHA,
+        decay=CLASS_CLEAN_DECAY,
         L=CLASS_CLEAN_L,
         H=CLASS_CLEAN_H,
         patience=CLASS_CLEAN_PATIENCE,
@@ -78,24 +79,6 @@ if __name__ == '__main__':
     plt.ylim([0, max(max(classifier.train_err), max(classifier.valid_err))])
     plt.savefig(str(CLASS_CLEAN_LOSS_PLOT), bbox_inches='tight', pad_inches=0)
     plt.close()
-    # Save parameters to CSV
-    csv_rows = list()
-    csv_rows.append(['Parameter', 'Value', 'Description'])
-    csv_rows.append(['$hidden\\_layer\\_size$', str(HIDDEN_LAYER_SIZES[0]),
-        'Neurons in hidden layer'])
-    csv_rows.append(['$\\eta$', str(CLASS_CLEAN_ETA), 'Learning rate'])
-    csv_rows.append(['$\\alpha$', str(CLASS_CLEAN_ALPHA), 'Momentum'])
-    csv_rows.append(['$max\\_epochs$', str(CLASS_CLEAN_MAX_EPOCHS),
-        'Maximum training epochs'])
-    csv_rows.append(['$L$', str(CLASS_CLEAN_L), 'Lower activation threshold'])
-    csv_rows.append(['$H$', str(CLASS_CLEAN_H), 'Upper activation threshold'])
-    csv_rows.append(['$patience$', str(CLASS_CLEAN_PATIENCE),
-        'Patience before early stopping'])
-    csv_rows.append(['$es\\_delta$', str(CLASS_CLEAN_ES_DELTA),
-        'Delta value for early stopping'])
-    with open(str(CLASS_CLEAN_PARAM_CSV), 'w') as csv_file:
-        csv_writer = csv.writer(csv_file)
-        csv_writer.writerows(csv_rows)
     # Write best epoch
     with open(str(CLASS_CLEAN_BEST_EPOCH), 'w') as best_epoch_file:
         best_epoch_file.write(str(classifier.best_weights_epoch))

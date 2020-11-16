@@ -73,7 +73,7 @@ class MLP:
             pred = layer_output
         return pred
 
-    def trainPoint(self, data, label, eta, alpha, L, H):
+    def trainPoint(self, data, label, eta, alpha, decay, L, H):
         """Update the weights for a single point
         Parameters
         ----------
@@ -85,6 +85,8 @@ class MLP:
             Learning rate
         alpha : float
             Momentum scalar
+        decay : float
+            Weight decay scalar
         L, H : float, optional
             Low and high thresholds for training
         """
@@ -92,7 +94,7 @@ class MLP:
         self.predict(data, one_hot=False)
         self.layers[-1].setLabel(label)
         self.layers[-1].thresholdOutputs(L, H)
-        self.layers[-1].getWChange(eta, alpha)
+        self.layers[-1].getWChange(eta, alpha, decay)
         # Back-prop error
         for i in range(len(self.layers)-2, -1, -1):
             # Stop the back-prop if we hit an untrainable layer
@@ -101,7 +103,7 @@ class MLP:
             down_w = self.layers[i+1].w
             down_delta = self.layers[i+1].delta
             self.layers[i].setDownstreamSum(down_w, down_delta)
-            self.layers[i].getWChange(eta, alpha)
+            self.layers[i].getWChange(eta, alpha, decay)
         # Apply weight changes
         for l in self.layers:
             l.changeW()
@@ -148,6 +150,7 @@ class MLP:
             max_epochs,
             eta,
             alpha,
+            decay,
             L,
             H,
             patience,
@@ -168,8 +171,8 @@ class MLP:
             These points are set aside before training
         max_epochs : int
             Maximum number of epochs to train
-        eta, alpha : float
-            Learning rate and Momentum scalar
+        eta, alpha, decay : float
+            Learning rate, Momentum scalar, and Weight decay scalar
         L, H : float
             Low and high thresholds for training
         patience : int
@@ -213,7 +216,7 @@ class MLP:
             epoch_train_data = train_data[:points_per_epoch]
             epoch_train_labels = train_labels[:points_per_epoch]
             for d, l in zip(epoch_train_data, epoch_train_labels):
-                self.trainPoint(d, l, eta, alpha, L, H)
+                self.trainPoint(d, l, eta, alpha, decay, L, H)
             # Log data every 10 epochs
             if (e % 10) == 0:
                 self.logError(

@@ -30,7 +30,7 @@ def splitClasses(data, labels):
         split_data[idx].append(d)
     return split_data
 
-def getLossByClass(autoencoder, data, labels):
+def getLossByClass(autoencoder, data, labels, expected):
     '''
     Parameters
     ----------
@@ -45,9 +45,10 @@ def getLossByClass(autoencoder, data, labels):
     '''
     loss = list()
     split_data = splitClasses(data, labels)
-    for i, d in enumerate(split_data):
+    split_expected = splitClasses(expected, labels)
+    for i, (d, e) in enumerate(zip(split_data, split_expected)):
         print(f'Evaluating class {i}')
-        loss.append(autoencoder.eval(d, d))
+        loss.append(autoencoder.eval(d, e))
     return loss
 
 def getSamplePoints(data, n):
@@ -105,17 +106,20 @@ sample_title = 'Autoencoder Sample Outputs'
 drawSamples(autoencoder, noisy_test_data, 8, AUTO_NOISY_IMG_DIR, sample_title)
 # Graph loss by class
 print('Testing train set')
-train_loss = getLossByClass(autoencoder, noisy_train_data, train_labels)
+train_loss = getLossByClass(autoencoder, noisy_train_data, train_labels, train_data)
+train_loss = [autoencoder.eval(noisy_train_data, train_data)] + train_loss
 print('Testing test set')
-test_loss = getLossByClass(autoencoder, noisy_test_data, test_labels)
+test_loss = getLossByClass(autoencoder, noisy_test_data, test_labels, test_data)
+test_loss = [autoencoder.eval(noisy_test_data, test_data)] + test_loss
 x = np.arange(len(train_loss))
+labels = ['Overall'] + list(range(len(train_loss) - 1))
 plt.figure()
 rect_width = 0.35
 plt.bar(x-rect_width/2, train_loss, rect_width, label='Train')
 plt.bar(x+rect_width/2, test_loss, rect_width, label='Test')
-plt.title('Autoencoder Loss by Class')
+plt.title('Denoising Autoencoder Loss by Class')
 plt.xlabel('Class')
-plt.xticks(x)
+plt.xticks(x, labels=labels)
 plt.ylabel('Loss')
 plt.grid(axis='y')
 plt.gca().set_axisbelow(True)
