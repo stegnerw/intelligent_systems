@@ -7,7 +7,7 @@ from dataset import shufflePair
 from hidden_layer import HiddenLayer
 from output_layer import OutputLayer
 # External imports
-import cupy as np
+import numpy as np
 import enlighten # Progress bar for training
 
 

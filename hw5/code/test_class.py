@@ -6,8 +6,7 @@ from settings import *
 from classifier import Classifier
 from sofm import SOFM
 # External imports
-import numpy
-import cupy as np
+import numpy as np
 import pathlib
 import matplotlib.pyplot as plt
 
@@ -36,7 +35,7 @@ def makeConfMat(classifier, data, labels, plot_name, title):
     # Plot confusion matrix and save
     plt.figure()
     plt.suptitle(title)
-    plt.imshow(np.asnumpy(conf_mat), cmap='Greens')
+    plt.imshow(conf_mat, cmap='Greens')
     for i in range(len(conf_mat)):
         for j in range(len(conf_mat[i])):
             color = 'k' if (conf_mat[i][j] <= 0.5*conf_mat.max()) else 'w'
@@ -66,14 +65,12 @@ train_features = list()
 for x in train_data:
     sofm.forwardPass(x)
     train_features.append(sofm.bmu)
-train_features = np.array(train_features)
-train_data_map = np.eye(SOFM_SHAPE[0]*SOFM_SHAPE[1])[train_features]
+train_data_map = np.eye(np.prod(SOFM_SHAPE))[train_features]
 test_features = list()
 for x in test_data:
     sofm.forwardPass(x)
     test_features.append(sofm.bmu)
-test_features = np.array(test_features)
-test_data_map = np.eye(SOFM_SHAPE[0]*SOFM_SHAPE[1])[test_features]
+test_data_map = np.eye(np.prod(SOFM_SHAPE))[test_features]
 # Load best weights back up and make confusion matrices
 classifier = Classifier(input_size=INPUTS)
 weight_files = sorted(CLASS_MODEL_DIR.iterdir())

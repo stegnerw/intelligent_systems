@@ -1,7 +1,7 @@
 ###############################################################################
 # Imports
 ###############################################################################
-import cupy as np
+import numpy as np
 
 
 class Layer:
@@ -58,7 +58,7 @@ class Layer:
             Output of the layer
         """
         # Add bias input
-        x = np.concatenate((np.array([1]), x))
+        x = np.concatenate(([1], x))
         # Save inputs for back-prop
         self.x = x
         # Dot product weights * inputs

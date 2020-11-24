@@ -2,8 +2,7 @@
 # Imports
 ###############################################################################
 from settings import *
-import cupy as np
-import numpy
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import pathlib
@@ -49,7 +48,7 @@ class SOFM:
         # Assign constants
         self.trainable = trainable
         self.shape = shape
-        self.num_neurons = self.shape[0] * self.shape[1]
+        self.num_neurons = np.prod(self.shape)
         self.inputs = inputs
         self.eta_0 = eta_0
         self.sigma_0 = sigma_0
@@ -67,7 +66,7 @@ class SOFM:
         self.e_norm = np.empty(self.num_neurons) # Normalized error matrix
         self.bmu = -1 # Best matching unit index
         self.d = np.empty(self.num_neurons) # Distance from BMU
-        self.neighborhood = np.empty(self.num_neurons) # Neighborhood around BMU
+        self.neighborhood = np.empty(self.num_neurons) # Neighborhood of BMU
         self.t = 0 # Current epoch number
         self.etaUpdate()
         self.sigmaUpdate()
@@ -159,9 +158,9 @@ class SOFM:
                 left=0.5/(ncol), right=1 - 0.5/(ncol)
         )
         for i in range(len(self.w)):
-            ax = plt.subplot(gs[np.asnumpy(self.coords)[i][0], np.asnumpy(self.coords)[i][1]])
+            ax = plt.subplot(gs[self.coords[i][0], self.coords[i][1]])
             img = self.w[i].copy()
-            ax.imshow(np.asnumpy(img).reshape(28, 28, order='F'), cmap='Greys_r')
+            ax.imshow(img.reshape(28, 28, order='F'), cmap='Greys_r')
             ax.axis('off')
             ax.set_xticklabels([])
             ax.set_yticklabels([])
@@ -189,11 +188,11 @@ class SOFM:
         for c, hm in enumerate(heatmaps):
             plt.figure()
             plt.suptitle(f'Heat Map for Class {c}')
-            plt.imshow(np.asnumpy(hm), cmap='Greens')
+            plt.imshow(hm, cmap='Greens')
             for i in range(len(hm)):
                 for j in range(len(hm[i])):
                     color = 'k' if (hm[i][j] <= 0.5*hm.max()) else 'w'
-                    plt.text(j, i, f'{np.asnumpy(hm)[i][j]:0.02f}',
+                    plt.text(j, i, f'{hm[i][j]:0.02f}',
                         va='center', ha='center', color=color)
             plt.colorbar()
             plt.tight_layout()
@@ -228,27 +227,27 @@ if __name__ == '__main__':
     import csv
     # Seed for consistency
     np.random.seed(SEED)
-    # Create network
-    sofm = SOFM(
-        SOFM_SHAPE,
-        INPUTS,
-        trainable = True,
-        eta_0 = SOFM_ETA_0,
-        eta_floor = SOFM_ETA_FLOOR,
-        sigma_0 = SOFM_SIGMA_0,
-        sigma_floor = SOFM_SIGMA_FLOOR,
-        tau_l = SOFM_TAU_L,
-        tau_n = SOFM_TAU_N,
-    )
-    sofm.train(train_data, SOFM_MAX_EPOCHS)
+    # # Create network
+    # sofm = SOFM(
+        # SOFM_SHAPE,
+        # INPUTS,
+        # trainable = True,
+        # eta_0 = SOFM_ETA_0,
+        # eta_floor = SOFM_ETA_FLOOR,
+        # sigma_0 = SOFM_SIGMA_0,
+        # sigma_floor = SOFM_SIGMA_FLOOR,
+        # tau_l = SOFM_TAU_L,
+        # tau_n = SOFM_TAU_N,
+    # )
+    # sofm.train(train_data, SOFM_MAX_EPOCHS)
 
-    # Save weights and images
-    print('Saving weights...')
-    sofm.saveWeights(str(SOFM_WEIGHT_FILE))
-    print('Saving features...')
-    sofm.drawFeat(SOFM_FEAT)
-    print('Saving heat maps...')
-    sofm.drawHeat(test_data, test_labels, SOFM_HEATMAP_DIR)
+    # # Save weights and images
+    # print('Saving weights...')
+    # sofm.saveWeights(str(SOFM_WEIGHT_FILE))
+    # print('Saving features...')
+    # sofm.drawFeat(SOFM_FEAT)
+    # print('Saving heat maps...')
+    # sofm.drawHeat(test_data, test_labels, SOFM_HEATMAP_DIR)
 
     # Save parameters to CSV
     print('Saving parameters...')
@@ -262,13 +261,13 @@ if __name__ == '__main__':
         'Epochs for phase 2'])
     csv_rows.append(['$\\eta_{0}$', f'{SOFM_ETA_0}',
         'Initial learning rate'])
-    csv_rows.append(['$\\tau_{L}$', f'{SOFM_TAU_L}',
+    csv_rows.append(['$\\tau_{L}$', f'{SOFM_TAU_L:0.02f}',
         'Learning decay time constant'])
     csv_rows.append(['$\\eta_{floor}$', f'{SOFM_ETA_FLOOR}',
         'Learning rate floor for phase 2'])
     csv_rows.append(['$\\sigma_{0}$', f'{SOFM_SIGMA_0}',
         'Initial neighborhood parameter'])
-    csv_rows.append(['$\\tau_{N}$', '{SOFM_TAU_N}',
+    csv_rows.append(['$\\tau_{N}$', f'{SOFM_TAU_N:0.02f}',
         'Neighborhood decay time constant'])
     csv_rows.append(['$\\sigma_{floor}$', f'{SOFM_SIGMA_FLOOR}',
         'Neighborhood floor for phase 2'])
