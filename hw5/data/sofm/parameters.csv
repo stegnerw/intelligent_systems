@@ -1,0 +1,10 @@
+Parameter,Value,Description
+$out_{shape}$,"(12, 12)",Feature map shape
+$epochs_{phase\_1}$,500,Epochs for phase 1
+$epochs_{phase\_2}$,500,Epochs for phase 2
+$\eta_{0}$,0.1,Initial learning rate
+$\tau_{L}$,217.15,Learning decay time constant
+$\eta_{floor}$,0.01,Learning rate floor for phase 2
+$\sigma_{0}$,6.0,Initial neighborhood parameter
+$\tau_{N}$,279.06,Neighborhood decay time constant
+$\sigma_{floor}$,1,Neighborhood floor for phase 2
