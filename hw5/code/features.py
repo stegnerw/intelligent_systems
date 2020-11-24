@@ -5,7 +5,7 @@
 from settings import *
 from autoencoder import Autoencoder
 # External imports
-import numpy as np
+import cupy as np
 import pathlib
 import matplotlib
 import matplotlib.pyplot as plt

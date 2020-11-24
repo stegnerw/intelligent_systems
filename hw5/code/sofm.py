@@ -2,7 +2,8 @@
 # Imports
 ###############################################################################
 from settings import *
-import numpy as np
+import cupy as np
+import numpy
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import pathlib
@@ -48,7 +49,7 @@ class SOFM:
         # Assign constants
         self.trainable = trainable
         self.shape = shape
-        self.num_neurons = np.prod(self.shape)
+        self.num_neurons = self.shape[0] * self.shape[1]
         self.inputs = inputs
         self.eta_0 = eta_0
         self.sigma_0 = sigma_0
@@ -158,9 +159,9 @@ class SOFM:
                 left=0.5/(ncol), right=1 - 0.5/(ncol)
         )
         for i in range(len(self.w)):
-            ax = plt.subplot(gs[self.coords[i][0], self.coords[i][1]])
+            ax = plt.subplot(gs[np.asnumpy(self.coords)[i][0], np.asnumpy(self.coords)[i][1]])
             img = self.w[i].copy()
-            ax.imshow(img.reshape(28, 28, order='F'), cmap='Greys_r')
+            ax.imshow(np.asnumpy(img).reshape(28, 28, order='F'), cmap='Greys_r')
             ax.axis('off')
             ax.set_xticklabels([])
             ax.set_yticklabels([])
@@ -188,11 +189,11 @@ class SOFM:
         for c, hm in enumerate(heatmaps):
             plt.figure()
             plt.suptitle(f'Heat Map for Class {c}')
-            plt.imshow(hm, cmap='Greens')
+            plt.imshow(np.asnumpy(hm), cmap='Greens')
             for i in range(len(hm)):
                 for j in range(len(hm[i])):
                     color = 'k' if (hm[i][j] <= 0.5*hm.max()) else 'w'
-                    plt.text(j, i, f'{hm[i][j]:0.02f}',
+                    plt.text(j, i, f'{np.asnumpy(hm)[i][j]:0.02f}',
                         va='center', ha='center', color=color)
             plt.colorbar()
             plt.tight_layout()
@@ -261,13 +262,13 @@ if __name__ == '__main__':
         'Epochs for phase 2'])
     csv_rows.append(['$\\eta_{0}$', f'{SOFM_ETA_0}',
         'Initial learning rate'])
-    csv_rows.append(['$\\tau_{L}$', f'{SOFM_TAU_L:0.02f}',
+    csv_rows.append(['$\\tau_{L}$', f'{SOFM_TAU_L}',
         'Learning decay time constant'])
     csv_rows.append(['$\\eta_{floor}$', f'{SOFM_ETA_FLOOR}',
         'Learning rate floor for phase 2'])
     csv_rows.append(['$\\sigma_{0}$', f'{SOFM_SIGMA_0}',
         'Initial neighborhood parameter'])
-    csv_rows.append(['$\\tau_{N}$', f'{SOFM_TAU_N:0.02f}',
+    csv_rows.append(['$\\tau_{N}$', '{SOFM_TAU_N}',
         'Neighborhood decay time constant'])
     csv_rows.append(['$\\sigma_{floor}$', f'{SOFM_SIGMA_FLOOR}',
         'Neighborhood floor for phase 2'])

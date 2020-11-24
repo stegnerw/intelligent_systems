@@ -2,7 +2,7 @@
 # Imports
 ###############################################################################
 from layer import Layer
-import numpy as np
+import cupy as np
 
 
 class OutputLayer(Layer):

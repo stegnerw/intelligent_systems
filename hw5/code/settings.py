@@ -2,7 +2,7 @@
 # Imports
 ###############################################################################
 import pathlib
-import numpy as np
+import cupy as np
 
 
 ###############################################################################
@@ -31,7 +31,7 @@ SOFM_ETA_FLOOR = 0.01 # Stage 2 eta (final)
 SOFM_SIGMA_0 = 0.5 * max(SOFM_SHAPE) # Initial sigma
 SOFM_SIGMA_FLOOR = 0.1 # Stage 2 sigma (final)
 SOFM_PHASE_1_EPOCHS = 1000
-SOFM_PHASE_2_EPOCHS = 9000 # 500 * SOFM_SHAPE[0] * SOFM_SHAPE[1]
+SOFM_PHASE_2_EPOCHS = 500 * SOFM_SHAPE[0] * SOFM_SHAPE[1]
 SOFM_MAX_EPOCHS = SOFM_PHASE_1_EPOCHS + SOFM_PHASE_2_EPOCHS
 SOFM_TAU_L = -SOFM_PHASE_1_EPOCHS / np.log(SOFM_ETA_FLOOR / SOFM_ETA_0)
 SOFM_TAU_N = -SOFM_PHASE_1_EPOCHS / np.log(SOFM_SIGMA_FLOOR / SOFM_SIGMA_0)

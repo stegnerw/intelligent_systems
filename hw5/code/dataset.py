@@ -2,7 +2,7 @@
 # Imports
 ###############################################################################
 from settings import *
-import numpy as np
+import cupy as np
 
 
 def shufflePair(data, labels):
@@ -48,7 +48,7 @@ if __name__ == '__main__':
             data_points[l] = list()
         data_points[l].append(d)
     classes.sort()
-    # Turn data lists into numpy arrays
+    # Turn data lists into cupy arrays
     for l in classes:
         data_points[l] = np.array(data_points[l], dtype=np.float64)
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
             else:
                 test_data.append(d)
                 test_labels.append(l)
-    # Turn lists into numpy arrays
+    # Turn lists into cupy arrays
     train_data = np.array(train_data)
     train_labels = np.array(train_labels)
     test_data = np.array(test_data)

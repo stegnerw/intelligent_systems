@@ -4,7 +4,7 @@
 # Custom imports
 from mlp import MLP
 # External imports
-import numpy as np
+import cupy as np
 import matplotlib.pyplot as plt
 
 
@@ -56,10 +56,11 @@ if __name__ == '__main__':
     for x in train_data:
         sofm.forwardPass(x)
         train_features.append(sofm.bmu)
-    train_data_map = np.eye(np.prod(SOFM_SHAPE))[train_features]
+    train_features = np.array(train_features)
+    train_data_map = np.eye(SOFM_SHAPE[0]*SOFM_SHAPE[1])[train_features]
 
     # Make MLP
-    classifier = Classifier(input_size=np.prod(SOFM_SHAPE))
+    classifier = Classifier(input_size=SOFM_SHAPE[0]*SOFM_SHAPE[1])
     classifier.addLayer(neurons=CLASSES, output=True, trainable=True)
     # Train the network
     print('* * * Begin training classifier * * *')
