@@ -227,27 +227,27 @@ if __name__ == '__main__':
     import csv
     # Seed for consistency
     np.random.seed(SEED)
-    # # Create network
-    # sofm = SOFM(
-        # SOFM_SHAPE,
-        # INPUTS,
-        # trainable = True,
-        # eta_0 = SOFM_ETA_0,
-        # eta_floor = SOFM_ETA_FLOOR,
-        # sigma_0 = SOFM_SIGMA_0,
-        # sigma_floor = SOFM_SIGMA_FLOOR,
-        # tau_l = SOFM_TAU_L,
-        # tau_n = SOFM_TAU_N,
-    # )
-    # sofm.train(train_data, SOFM_MAX_EPOCHS)
+    # Create network
+    sofm = SOFM(
+        SOFM_SHAPE,
+        INPUTS,
+        trainable = True,
+        eta_0 = SOFM_ETA_0,
+        eta_floor = SOFM_ETA_FLOOR,
+        sigma_0 = SOFM_SIGMA_0,
+        sigma_floor = SOFM_SIGMA_FLOOR,
+        tau_l = SOFM_TAU_L,
+        tau_n = SOFM_TAU_N,
+    )
+    sofm.train(train_data, SOFM_MAX_EPOCHS)
 
-    # # Save weights and images
-    # print('Saving weights...')
-    # sofm.saveWeights(str(SOFM_WEIGHT_FILE))
-    # print('Saving features...')
-    # sofm.drawFeat(SOFM_FEAT)
-    # print('Saving heat maps...')
-    # sofm.drawHeat(test_data, test_labels, SOFM_HEATMAP_DIR)
+    # Save weights and images
+    print('Saving weights...')
+    sofm.saveWeights(str(SOFM_WEIGHT_FILE))
+    print('Saving features...')
+    sofm.drawFeat(SOFM_FEAT)
+    print('Saving heat maps...')
+    sofm.drawHeat(test_data, test_labels, SOFM_HEATMAP_DIR)
 
     # Save parameters to CSV
     print('Saving parameters...')
