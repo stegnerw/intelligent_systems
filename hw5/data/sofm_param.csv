@@ -1,7 +1,7 @@
 Parameter,Value,Description
 $out_{shape}$,"(12, 12)",Feature map shape
 $epochs_{phase\_1}$,1000,Epochs for phase 1
-$epochs_{phase\_2}$,72000,Epochs for phase 2
+$epochs_{phase\_2}$,4000,Epochs for phase 2
 $\eta_{0}$,0.1,Initial learning rate
 $\tau_{L}$,434.29,Learning decay time constant
 $\eta_{floor}$,0.01,Learning rate floor for phase 2
