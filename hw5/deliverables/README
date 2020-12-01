@@ -1,0 +1,103 @@
+EECE6036 Homework 3
+
+* * * * * * TL;DR * * * * * *
+
+The dataset is pre-partitioned, but run dataset.py to repartition it.
+
+The networks are pre-trained, but run sofm.py to train the SOFM, and run
+classifier.py to train the classifier.
+WARNING: This will delete the pre-trained models.
+
+To test the classifier, run test_classifier.py.
+
+* * * * * * Directory Structure * * * * * *
+
+This project has the following directory structure:
+<base directory>/
+  code/
+    sofm/
+      <best pre-trained SOFM weights>
+    class/
+      <best pre-trained classifier weights>
+    dataset/
+      <pre-partitioned test/train data/labels saved as numpy arrays>
+    data.txt
+    labels.txt
+    requirements.txt
+    <python source files>
+    <bash scripts for automated testing>
+  data/
+    <generated data>
+  images/
+    <generated images>
+  README
+
+* * * * * * Parameter Settings * * * * * *
+
+All of the hyper-parameters are set in settings.py.
+If you want to change them, edit them in settings.py under the Constant Values
+heading.
+
+* * * * * * Running the Code * * * * * *
+
+It runs in Python 3, but I specifically tested it with Python 3.6.9.
+It will NOT run in Python 2.
+
+To run the each file, run the following command from the code/ directory:
+
+python3 <file_name>
+
+Note: Depending on how you installed Python, you might replace python3 with
+python
+
+dataset.py - partition the dataset into test/train.
+This is not necessary to run because I have included the partitioned dataset
+in my submission.
+
+sofm.py - Trains the SOFM model and saves the best weights and training
+parameters.
+WARNING: These files delete the current model after training completes.
+
+classifier.py - Trains the classifier model and saves the best weights,
+training parameters, and the loss over epochs graph.
+WARNING: These files delete the current model before beginning training, then
+save a new set of weights every 10 epochs.
+
+test_classifier.py - Tests the classifier model loaded up from the class
+directory.
+Generates all necessary plots for the report.
+
+The rest of the source files are classes which do not run but are used to
+implement the training.
+
+I have included 3 bash scripts to facilitate running the necessary files
+automatically in the correct order.
+The scripts are as follows:
+
+run_all.sh - Runs sofm.py, classifier.py, and test_class.py in that order.
+
+run_class.sh - Runs the files classifier.py and test_class.py to train and
+test the classifier.
+Requires SOFM weights to work.
+
+I don't know if they will run on Windows because I don't know if you can run
+bash on Windows, so you might have to run the files manually.
+
+* * * * * * Dependencies * * * * * *
+
+The following are the package dependencies.
+  - numpy (1.19.2)
+  - matplotlib (3.3.1)
+  - enlighten (1.6.2)
+It is very likely that numpy and matplotlib are already installed, but you
+might not have enlighten.
+Enlighten is used for progress bars for training, but is not used in the other
+files.
+You only need enlighten if you want to run my training code.
+To install all necessary requirements, run the following command in the code
+directory:
+
+pip3 install -r requirements.txt
+
+Note: Depending on how you installed Python, you might replace pip3 with pip.
+
