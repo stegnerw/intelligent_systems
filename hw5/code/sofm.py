@@ -164,7 +164,7 @@ class SOFM:
             ax.axis('off')
             ax.set_xticklabels([])
             ax.set_yticklabels([])
-        plt.suptitle('SOFM Features', fontsize='medium')
+        # plt.suptitle('SOFM Features', fontsize='medium')
         plt.savefig(str(f_name))
         plt.close()
 
@@ -187,7 +187,7 @@ class SOFM:
         heatmaps = heatmaps.reshape(len(labels[0]), self.shape[0], self.shape[1])
         for c, hm in enumerate(heatmaps):
             plt.figure()
-            plt.suptitle(f'Heat Map for Class {c}')
+            plt.suptitle(f'Heat Map for Class {c}', fontsize='x-large')
             plt.imshow(hm, cmap='Greens')
             for i in range(len(hm)):
                 for j in range(len(hm[i])):

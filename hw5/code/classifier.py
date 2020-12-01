@@ -95,3 +95,30 @@ if __name__ == '__main__':
     with open(str(CLASS_BEST_EPOCH), 'w') as best_epoch_file:
         best_epoch_file.write(str(classifier.best_weights_epoch))
 
+    # Save parameters to CSV
+    print('Saving training parameters')
+    csv_rows = list()
+    csv_rows.append(['Parameter', 'Value', 'Description'])
+    csv_rows.append(['$\\eta$', str(CLASS_ETA),
+        'Learning rate'])
+    if (CLASS_ALPHA > 0):
+        csv_rows.append(['$\\alpha$', str(CLASS_ALPHA),
+            'Momentum'])
+    if (CLASS_DECAY > 0):
+        csv_rows.append(['$\\lambda$', str(CLASS_DECAY),
+            'Weight decay'])
+    csv_rows.append(['$epochs_{max}$', str(CLASS_MAX_EPOCHS),
+        'Maximum training epochs'])
+    csv_rows.append(['$L$', str(CLASS_L),
+        'Lower activation threshold'])
+    csv_rows.append(['$H$', str(CLASS_H),
+        'Upper activation threshold'])
+    csv_rows.append(['$patience$', str(CLASS_PATIENCE),
+        'Patience before early stopping'])
+    if (CLASS_ES_DELTA > 0):
+        csv_rows.append(['$es\\_delta$', str(CLASS_ES_DELTA),
+            'Delta value for early stopping'])
+    with open(str(DATA_DIR.joinpath('class_params.csv')), 'w') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerows(csv_rows)
+

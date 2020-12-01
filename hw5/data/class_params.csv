@@ -1,0 +1,7 @@
+Parameter,Value,Description
+$\eta$,0.05,Learning rate
+$\alpha$,0.8,Momentum
+$epochs_{max}$,1000,Maximum training epochs
+$L$,0.25,Lower activation threshold
+$H$,0.75,Upper activation threshold
+$patience$,5,Patience before early stopping

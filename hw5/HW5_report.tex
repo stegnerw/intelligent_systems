@@ -9,6 +9,7 @@
 \usepackage{wrapfig}
 \usepackage{subfig}
 \usepackage{csvsimple} % csv tables
+\usepackage{caption} % ContinuedFloat macro
 
 % Title spacing
 \usepackage{titlesec}
@@ -61,7 +62,7 @@
 \newcommand{\digitwidth}{0.08\textwidth}
 \newcommand{\doubledigitwidth}{0.15\textwidth}
 
-\title{EECE6036 - Homework 4}
+\title{EECE6036 - Homework 5}
 \author{Wayne Stegner}
 \date{\today}
 
@@ -69,204 +70,170 @@
   \maketitle
   \section{Problem 1}
   \subsection{Problem Summary}
-  \par The goal of this problem is to create a denoising autoencoder using
-  multi-layer feed forward neural networks.
-  The network structure is identical to that in Homework 3 Problem 2 with the
-  exception that the input data has noise applied to it, and it is expected to
-  reconstruct the image without the noise.
-  The noise model used in this problem is a salt-and-pepper noise model, where
-  each input pixel has a probability of 0.4 to turn black and a probability of
-  0.05 to turn white.
-  The pepper probability is higher to compensate for the fact that most of the
-  images are black already.
+  \par The goal of this problem is to create a self-organized feature map
+  (SOFM).
+  The SOFM will have a 12 X 12 neuron output map, and it will learn the
+  features of the MNIST dataset.
 
   \subsection{Results}
   \subsubsection{System Description}
-  \par \tabRef{tab:auto_param} shows the hyper-parameters used in training
-  the autoencoder (both clean and denoising).
-  I retrained my clean autoencoder because I added weight decay and wanted to
-  properly compare the networks.
-  These hyper-parameters were found empirically.
+  \par \tabRef{tab:sofm_param} shows the hyper-parameters used in training the
+  SOFM.
+  These hyper-parameters were found empirically with considerations for
+  maximizing the classification accuracy for the second problem of this
+  assignment.
   \begin{table}[htb]
     \centering
-    \vspace{-12pt}
     \caption{Autoencoder Training Hyper-Parameters}
-    \vspace{-12pt}
-    \csvautotabular{data/auto_params.csv}
-    \label{tab:auto_param}
-    \vspace{-12pt}
+    \csvautotabular{data/sofm_param.csv}
+    \label{tab:sofm_param}
   \end{table}
-  \par Weight initialization is done randomly on a uniform distribution between
-  $(-a, +a)$ where $a = \sqrt(\frac{6}{N_{source} + N_{target}})$, and
-  $N_{source}$ and $N_{target}$ are the numbers of neurons on the source and
-  target layers respectively.
-  \par My learning algorithm includes weight decay.
-  To calculate weight updates, this adds the term $-\lambda * \eta * w$.
-  The goal of adding weight decay is to improve generalizability, especially
-  because the features of the autoencoder will be used to make a classifier in
-  the next problem.
-  \par The network utilizes early stopping by monitoring a validation set,
-  which consists of 1000 training points that are set aside before training.
-  This leaves 3000 data points for training the weights of the networks.
-  If the validation loss does not improve for $patience$ steps (1 step = 10
-  epochs), training halts.
-  The validation is considered improved if the validation is $es\_delta$ lower
-  than the previous improved validation loss.
-  The weights used by the final network are the weights from the epoch with the
-  lowest validation loss.
+  \par Weight initialization is done on a uniform distribution on the interval
+  $(0, 1)$.
+  \par This SOFM trains using two-phase learning, as described in the slides.
+  In the first phase, the learning rate, $\eta(t)$ starts at $\eta_{0}$, and it
+  decays to $\eta_{floor}$ by:
+  \begin{center}
+    \par $\eta(t) = \eta_{0} * exp(\frac{-t}{\tau_{L}})$
+  \end{center}
+  \begin{center}
+    \par $\tau_{L} = \frac{-epochs_{phase\_1}}{ln(\eta_{floor} / \eta_{0})}$
+  \end{center}
+  \par Similarly, the neighborhood parameter, $\sigma(t)$ starts at
+  $\sigma_{0}$, and it decays to $\sigma_{floor}$ by:
+  \begin{center}
+    \par $\sigma(t) = \sigma_{0} * exp(\frac{-t}{\tau_{N}})$
+  \end{center}
+  \begin{center}
+    \par $\tau_{N} = \frac{-epochs_{phase\_1}}{ln(\sigma_{floor} / \sigma_0)}$
+  \end{center}
+  \par During the second phase, the learning rate and neighborhood parameter
+  are held at $\eta_{floor}$ and $\sigma_{floor}$ respectively.
 
-  \subsubsection{Network Results}
-  \par Throughout the duration of training, the loss of the training and
-  validation sets was tracked every 10 epochs.
-  The loss was calculated using $J2$ loss.
-  \figRef{fig:auto_clean_loss} and \figRef{fig:auto_noisy_loss} show training
-  and validation loss for the clean and denoising autoencoders respectively.
-  The vertical lines designates the point where the validation error is
-  minimized.
-  The clean autoencoder achieves a minimal test loss of
-  \input{data/auto_clean/test_loss.dat}\unskip{} at epoch
-  \input{data/auto_clean/best_epoch.dat}\unskip{}.
-  The denoising autoencoder achieves a minimal test loss of
-  \input{data/auto_noisy/test_loss.dat}\unskip{} at epoch
-  \input{data/auto_noisy/best_epoch.dat}\unskip{}.
-  \begin{figure}[htb]
-    \vspace{-12pt}
-    \begin{minipage}{0.45\textwidth}
-      \centering
-      \includegraphics[width=0.95\textwidth]{images/auto_clean/loss_graph.png}
-      \caption{Training and validation loss of the clean autoencoder.}
-      \label{fig:auto_clean_loss}
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.45\textwidth}
-      \centering
-      \includegraphics[width=0.95\textwidth]{images/auto_noisy/loss_graph.png}
-      \caption{Training and validation loss of the denoising autoencoder.}
-      \label{fig:auto_noisy_loss}
-    \end{minipage}
-    \vspace{-12pt}
-  \end{figure}
-  \par After training, the loss in each class was measured for each
-  autoencoder.
-  \figRef{fig:bar_clean} and \figRef{fig:bar_noisy} show the final loss of each
-  class (and overall) for the clean and denoising autoencoders respectively.
-  \begin{figure}
-    \begin{minipage}{0.45\textwidth}
-      \centering
-      \includegraphics[width=0.95\textwidth]{images/auto_clean/loss_bar_plot.png}
-      \caption{Loss of the clean autoencoder.}
-      \label{fig:bar_clean}
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.45\textwidth}
-      \centering
-      \includegraphics[width=0.95\textwidth]{images/auto_noisy/loss_bar_plot.png}
-      \caption{Loss of the denoising autoencoder.}
-      \label{fig:bar_noisy}
-    \end{minipage}
-  \end{figure}
+  \subsubsection{Heat Maps}
+  \par \figRef{fig:heatmap} shows activation heat maps for the test set after
+  training.
+  These maps were found by measuring the number of times a given neuron won for
+  each class.
 
   \subsubsection{Features}
-  \par After training, the features learned by 20 arbitrary neurons in the
-  hidden layer of both the classifier and autoencoder were observed by
-  normalizing the weights from 0 to 1 and then displaying them like an image.
-  The images are mapped so 1 is white and 0 is black.
-  \figRef{fig:clean_feat} shows the features of the clean autoencoder, and
-  \figRef{fig:noisy_feat} shows the features of the noisy autoencoder.
+  \par \figRef{fig:feat} shows the feature map learned by the SOFM after
+  training.
+  Each feature is a representation of the weights for that neuron.
 
-  \subsubsection{Sample Outputs}
-  \par After training, the outputs of eight random data points from the test
-  set were tested in both the clean and denoising autoencoders.
-  \figRef{fig:samples_clean} shows the original and reconstructed clean images,
-  and \figRef{fig:samples_noisy} shows the original and denoised images.
+  % Float Pages
+  \begin{figure}[p]
+    \centering
+    \subfloat{
+      \includegraphics[width=0.45\textwidth]
+        {images/heatmaps/class_0.png}
+    }
+    \subfloat{
+      \includegraphics[width=0.45\textwidth]
+        {images/heatmaps/class_1.png}
+    } \\
+    \subfloat{
+      \includegraphics[width=0.45\textwidth]
+        {images/heatmaps/class_2.png}
+    }
+    \subfloat{
+      \includegraphics[width=0.45\textwidth]
+        {images/heatmaps/class_3.png}
+    } \\
+    \subfloat{
+      \includegraphics[width=0.45\textwidth]
+        {images/heatmaps/class_4.png}
+    }
+    \subfloat{
+      \includegraphics[width=0.45\textwidth]
+        {images/heatmaps/class_5.png}
+    }
+    \caption{Class heat maps of the SOFM.}
+    \label{fig:heatmap}
+  \end{figure}
+  \begin{figure}[p]\ContinuedFloat
+    \centering
+    \subfloat{
+      \includegraphics[width=0.45\textwidth]
+        {images/heatmaps/class_6.png}
+    }
+    \subfloat{
+      \includegraphics[width=0.45\textwidth]
+        {images/heatmaps/class_7.png}
+    } \\
+    \subfloat{
+      \includegraphics[width=0.45\textwidth]
+        {images/heatmaps/class_8.png}
+    }
+    \subfloat{
+      \includegraphics[width=0.45\textwidth]
+        {images/heatmaps/class_9.png}
+    }
+    \caption{Class heat maps of the SOFM, continued.}
+    \label{fig:heatmap_cont}
+  \end{figure}
+  \begin{figure}[p]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/features.png}
+    \caption{Feature map produced by the SOFM algorithm.}
+    \label{fig:feat}
+  \end{figure}
 
   \subsection{Discussion and Analysis of Results}
   \par Overall, the results look pretty good.
-  The denoising autoencoder does not reconstruct the images as well as the
-  clean autoencoder, but this is expected because denoising is a more difficult
-  task than simple reconstruction.
-  To compensate for the increased difficulty, the denoising autoencoder was
-  trained with a lower $\eta$ value and a higher $\lambda$ value.
-  The higher $\lambda$ is evident because the loss values of the train and test
-  sets are closer together for the denoising autoencoder than for the clean
-  autoencoder.
-  \par In \figRef{fig:bar_clean} and \figRef{fig:bar_noisy}, the loss for both
-  the clean and denoising autoencoders are the lowest for reconstructing 1s.
-  This makes sense because a 1 is simply a straight line, so it should be quite
-  simple to recognize and reconstruct.
-  None of the loss values stand out as particularly high, at least not as much
-  as the 1s stand out for being low.
-  \par The clean features in \figRef{fig:clean_feat} are just a bunch of dots,
-  while the denoising features in \figRef{fig:noisy_feat} contain more lines
-  and curves.
-  The denoising features bear more resemblance to actual numbers than the clean
-  features.
-  Because of the weight decay, the borders of the clean features are uniform
-  color because of the absence of input in those regions, while the borders
-  of the denoising features appear as TV static because they were stimulated
-  by the noise.
+  The class heat maps in \figRef{fig:heatmap} show that the classes each have
+  their own distinct regions of activity, with a few exceptions.
+  These regions of activity correlate with the class appearing on the feature
+  map.
+  For example, the heat map for class 0 is active in the bottom right corner,
+  and the feature map in \figRef{fig:feat} looks like 0s in the bottom right
+  corner.
+  Classes 4 and 9 are very close in proximity, with class 4 being in the
+  middle of the class 9 region.
+  This is expected because 4 and 9 look very similar, so their regions on the
+  feature map should be spatially close together.
+  The feature map in \figRef{fig:feat} supports this observation.
+  In the upper right portion of the feature map, there is a mix of 4s and 9s in
+  a similar arrangement to the heat maps for those classes.
+  Also in \figRef{fig:heatmap}, the heat map for class 5 shows three major
+  regions of activity.
+  The feature map in \figRef{fig:feat} has 5s appearing in those regions.
+  \par Classes which are similar in shape are spatially close to each other in
+  the feature map.
+  For example, the bottom left corner of the feature map in \figRef{fig:feat}
+  has a combination of 3s and 5s because they are similar in shape.
+  Both 3 and 5 are similar to 8, which is found directly above the 3s and 5s in
+  the feature map.
+  6 and 0 are also similar, and 6 is found just above the 0 region in the
+  feature map.
+  \par There are a few features in \figRef{fig:feat} which do not clearly
+  resemble any class.
+  For example, the feature three blocks down and three from the left side looks
+  like a smudge or a blur.
+  That same feature exhibits activity in the heat maps in \figRef{fig:heatmap}
+  in classes 2, 3, 5, 6, 7, and 8.
+  That feature may be an artifact of the hyper-parameters chosen for training,
+  and more testing should be done to try to eliminate ambiguous features.
 
   \subsection{Conclusion}
-  \par The denoising autoencoder is able to effectively remove salt-and-pepper
-  noise and reconstruct digits from the MNIST dataset.
-  While the performance is not as good as the clean autoencoder it is able to
-  clean out the salt-and-pepper noise very well, which is a much more difficult
-  task than simply reconstructing the digits.
-  Further testing in optimizing the hyper-parameters of the network can help to
-  improve the reconstruction accuracy even further.
-
-  % Figures Page
-  \begin{figure}[p]
-    \begin{minipage}{0.45\textwidth}
-      \centering
-      \input{./auto_clean_feat.tex}
-      \caption{Clean features.}
-      \label{fig:clean_feat}
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.45\textwidth}
-      \centering
-      \input{./auto_noisy_feat.tex}
-      \caption{Denoising features.}
-      \label{fig:noisy_feat}
-    \end{minipage}
-  \end{figure}
-  \begin{figure}[p]
-    \centering
-    \input{./samples_clean.tex}
-    \caption{Original (top) and reconstructed (bottom) data points.}
-    \label{fig:samples_clean}
-  \end{figure}
-  \begin{figure}[p]
-    \centering
-    \input{./samples_noisy.tex}
-    \caption{Original (top) and denoised (bottom) data points.}
-    \label{fig:samples_noisy}
-  \end{figure}
+  \par The SOFM is able to effectively learn features from the MNIST dataset
+  and group them by similarity.
+  Further optimizing the hyper-parameters of the network may help to improve
+  the produced feature map further.
 
   \pagebreak
   \section{Problem 2}
   \subsection{Problem Summary}
   \par The goal of this problem is to create a classifier using the features
-  learned from the clean and denoising autoencoders trained in Problem 1.
-  This is done by taking the weights of the hidden layers of the autoencoders
-  and then randomly initializing weights for a classification layer for the
-  output.
-  During training, only the output weights are updated, so the network will
-  not change the features learned by the hidden layer.
-  \par For the purposes of this report, the ``clean classifier'' refers to the
-  classifier using the weights of the autoencoder with no noise applied, and
-  the ``noisy classifier'' refers to the classifier using weights from the
-  denoising autoencoder.
+  learned from the SOFM trained in Problem 1.
+  This is done by passing the image through the SOFM using winner-take-all to
+  generate a one-hot encoded feature vector to pass into the MLP classifier.
 
   \subsection{Results}
   \subsubsection{System Description}
   \par \tabRef{tab:class_param} shows the hyper-parameters used in training the
   classifier.
-  These hyper-parameters were found empirically, considering both minimizing
-  the final loss and training time.
-  More work can to find more optimal hyper-parameters, but this set of
-  hyper-parameters produces pretty good results.
+  These hyper-parameters were found empirically.
   \begin{table}[htb]
     \centering
     \vspace{-12pt}
@@ -276,107 +243,60 @@
     \label{tab:class_param}
     \vspace{-12pt}
   \end{table}
-  \par This network uses the same weight initialization, early stopping, and
-  weight decay as described in Problem 1.
-  The difference here is that the values on the output layer are thresholded
-  during training.
-  If the neuron fires above $H$ and its target is 1, the error is considered 0
-  for training.
-  If the neuron fires below $L$ and its target is 0, the error is also
-  considered 0 for training.
+  \par This network uses the same training algorithm as the previous problems,
+  including momentum, thresholding, early stopping, and weight decay.
 
   \subsubsection{Network Results}
   \par Throughout the duration of training, the loss of the training and
-  validation sets was tracked every 10 epochs.
-  The loss was calculated using $1 - balanced\_accuracy$ with a winner-take-all
-  approach on the output layer.
-  \figRef{fig:class_clean_loss} and \figRef{fig:class_noisy_loss} show plots of
-  the loss values while training the clean and noisy classifiers respectively.
+  validation sets was tracked every 5 epochs, shown in \figRef{fig:loss}.
   The vertical lines designate the point where the validation error is
   minimized.
-  The clean classifier achieves a minimal test loss of
-  \input{data/class_clean/test_loss.dat}\unskip{} at epoch
-  \input{data/class_clean/best_epoch.dat}\unskip{}.
-  The noisy classifier achieves a minimal test loss of
-  \input{data/class_noisy/test_loss.dat}\unskip{} at epoch
-  \input{data/class_noisy/best_epoch.dat}\unskip{}.
+  The classifier achieves a minimal test loss of
+  \input{data/test_loss.dat}\unskip{} at epoch
+  \input{data/best_epoch.dat}\unskip{}.
   \begin{figure}[htb]
-    \begin{minipage}{0.45\textwidth}
-      \centering
-      \includegraphics[width=0.95\textwidth]{images/class_clean/loss_graph.png}
-      \caption{Training and validation loss of the clean classifier.}
-      \label{fig:class_clean_loss}
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.45\textwidth}
-      \centering
-      \includegraphics[width=0.95\textwidth]{images/class_noisy/loss_graph.png}
-      \caption{Training and validation loss of the noisy classifier.}
-      \label{fig:class_noisy_loss}
-    \end{minipage}
-  \end{figure}
-  \par \figRef{fig:conf_clean} and \figRef{fig:conf_noisy} show the confusion
-  matrices for the train and test sets of the clean and noisy classifier
-  respectively.
-  \begin{figure}[p]
     \centering
-    \subfloat[][]{
-      \includegraphics[width=0.45\textwidth]
-        {images/class_clean/train_conf_mat.png}
-      \label{fig:conf_clean_train}
-    }
-    \subfloat[][]{
-      \includegraphics[width=0.45\textwidth]
-        {images/class_clean/test_conf_mat.png}
-      \label{fig:conf_clean_test}
-    }
-    \caption{Confusion matrices of the clean classifier.}
-    \label{fig:conf_clean}
+    \includegraphics[width=0.5\textwidth]{images/loss_graph.png}
+    \caption{Training and validation loss of the classifier.}
+    \label{fig:loss}
   \end{figure}
-  \begin{figure}[p]
+  \par \figRef{fig:conf} show the confusion matrices for the train and
+  test sets of the classifier.
+  \begin{figure}[htb]
     \centering
-    \subfloat[][]{
+    \subfloat{
       \includegraphics[width=0.45\textwidth]
-        {images/class_noisy/train_conf_mat.png}
-      \label{fig:conf_noisy_train}
+        {images/train_conf_mat.png}
+      \label{fig:conf_train}
     }
-    \subfloat[][]{
+    \subfloat{
       \includegraphics[width=0.45\textwidth]
-        {images/class_noisy/test_conf_mat.png}
-        \label{fig:conf_noisy_test}
+        {images/test_conf_mat.png}
+      \label{fig:conf_test}
     }
-    \caption{Confusion matrices of the noisy classifier.}
-    \label{fig:conf_noisy}
+    \caption{Confusion matrices of the classifier.}
+    \label{fig:conf}
   \end{figure}
 
   \subsection{Discussion and Analysis of Results}
-  \par Overall, the results of both classifiers look pretty good.
-  The diagonals of the confusion matrices in \figRef{fig:conf_clean} and
-  \figRef{fig:conf_noisy} are very dark, with hardly any coloring in the
-  incorrect boxes.
-  Many of the incorrect classifications are in two classes which look similar.
-  For example, both networks had many mix-ups between 4s and 9s.
-  In general, it looks like both classifiers were confused about the same
-  classes.
-  The noisy classifier performed better overall than the clean classifier.
-  From an interpretability performance, this makes sense to me because the
-  features learned by the denoising autoencoder in \figRef{fig:noisy_feat} make
-  much more sense than the features learned by the clean autoencoder in
-  \figRef{fig:clean_feat}.
-  \par The classification performance was not as good as the classifier from
-  Homework 3, where a loss of 0.070 was achieved.
-  This is likely because the classifier in Homework 3 is able to fine tune its
-  features to the task of classification, while the features learned for this
-  homework were specifically for image reconstruction.
-  It may be possible to increase the accuracy by using the weights from the
-  autoencoder to initialize the classifier, but allowing them to train.
+  \par Overall, the classifier performs pretty well.
+  The network only took 50 epochs to train, and was able to train significantly
+  faster than the previous classifiers.
+  The confusion matrices in \figRef{fig:conf} show a dark diagonal line but
+  with some visible confusion, especially between classes 4 and 9.
+  The significant points of confusion are between classes which are adjecent,
+  such as 4/9 and 3/8.
+  \par The classification performance was not as good as the classifiers from
+  Homework 3 (loss = 0.070) and Homework 4 (losses of 0.103 and 0.121).
+  It makes sense that this classifier is not as performant, because the one-hot
+  vectors from the SOFM do not carry as much information as the analog layers
+  from the MLPs.
 
   \subsection{Conclusion}
-  \par Using the features learned by the autoencoders, the classifiers are able
-  to effectively classify the MNIST dataset.
-  While they do not perform as well as the classifier where all of the layers
-  are trained, they train much more quickly and effectively demonstrate how the
-  autoencoders' features are useful for distinguishing between different
-  digits.
+  \par Using the features learned by the SOFM, the classifier is able to
+  effectively classify the MNIST dataset.
+  While its performance is not as good as the previously studied classifiers,
+  it effectively demonstrates how the SOFM features are viable for
+  distinguishing between different digits.
 
 \end{document}
